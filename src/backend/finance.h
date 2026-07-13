@@ -27,6 +27,10 @@ extern "C"
 
     // expense on different category
     int get_category_spending_breakdown(const char *month_yyyy_mm, CategoryBreakdown *out_breakdown, int max_categories);
+
+    // expense comparison
+    void compare_monthly_spending(const char *current_month, const char *prev_month, double *out_current_spent, double *out_prev_spent, double *out_percentage_diff);
+
 #ifdef __cplusplus
 }
 #endif

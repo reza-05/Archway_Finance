@@ -9,8 +9,15 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Enable FetchContent
 include(FetchContent)
 
-# Use macOS OpenGL 3 Core Profile headers and silence legacy warnings
-add_compile_definitions(GLFW_INCLUDE_GLCOREARB GL_SILENCE_DEPRECATION)
+# macOS compile fixes: Use OpenGL 3, silence legacy warnings, bypass broken Apple SDK Carbon/Cocoa headers
+if(APPLE)
+    add_compile_definitions(
+        GLFW_INCLUDE_GLCOREARB 
+        GL_SILENCE_DEPRECATION 
+        GLFW_NATIVE_INCLUDE_NONE
+        "id=void*"
+    )
+endif()
 
 # 1. Fetch GLM (Header-only math)
 FetchContent_Declare(
@@ -48,7 +55,6 @@ add_library(imgui STATIC ${IMGUI_SOURCES})
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/backend  # macOS Sequoia-তে missing CarbonCore/Script.h হেডার এরর এড়াতে যুক্ত করা হয়েছে
 )
 target_link_libraries(imgui PUBLIC glfw)
 
