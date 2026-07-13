@@ -19,7 +19,39 @@ extern "C"
         char type[MAX_TYPE_LEN];
         double balance;
     } Account;
-    
+
+    // category sturcture
+    typedef struct
+    {
+        int id;
+        char name[MAX_NAME_LEN];
+        char type[MAX_TYPE_LEN];
+    } Category;
+
+    //  transaction sturcture
+    typedef struct
+    {
+        int id;
+        int account_id;
+        int category_id;
+        double amount;
+        char date[MAX_DATE_LEN];
+        char description[MAX_DESC_LEN];
+        char account_name[MAX_NAME_LEN];
+        char category_name[MAX_NAME_LEN];
+        char category_type[MAX_TYPE_LEN];
+    } Transaction;
+
+    // savings goal sturcture
+    typedef struct
+    {
+        int id;
+        char name[MAX_NAME_LEN];
+        double target_amount;
+        double current_amount;
+        char target_date[MAX_DATE_LEN];
+    } SavingGoal;
+
 #ifdef __cplusplus
 }
 #endif
