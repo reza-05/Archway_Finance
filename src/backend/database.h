@@ -69,6 +69,11 @@ extern "C"
     int add_transaction(int account_id, int category_id, double amount, const char *date, const char *description);
     int get_transactions(Transaction *out_transactions, int max_transactions);
     int delete_transaction(int transaction_id);
+    // saving goal operation
+    int add_saving_goal(const char *name, double target_amount, double current_amount, const char *target_date);
+    int get_saving_goals(SavingGoal *out_goals, int max_goals);
+    int update_saving_goal_progress(int goal_id, double increment_amount);
+
 #ifdef __cplusplus
 }
 #endif
