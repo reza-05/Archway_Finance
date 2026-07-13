@@ -52,6 +52,23 @@ extern "C"
         char target_date[MAX_DATE_LEN];
     } SavingGoal;
 
+    // database controll functions
+    int init_db(const char *db_path);
+    void close_db();
+
+    // account operations
+    int add_account(const char *name, const char *type, double initial_balance);
+    int get_accounts(Account *out_accounts, int max_accounts);
+    int update_account_balance(int account_id, double new_balance);
+
+    // category operations
+    int add_category(const char *name, const char *type);
+    int get_categories(Category *out_categories, int max_categories);
+
+    // transaction operations
+    int add_transaction(int account_id, int category_id, double amount, const char *date, const char *description);
+    int get_transactions(Transaction *out_transactions, int max_transactions);
+    int delete_transaction(int transaction_id);
 #ifdef __cplusplus
 }
 #endif
