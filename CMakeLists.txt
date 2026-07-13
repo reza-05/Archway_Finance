@@ -8,8 +8,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Enable FetchContent
 include(FetchContent)
-# Use macOS OpenGL 3 Core Profile headers and silence legacy warnings
-add_compile_definitions(GLFW_INCLUDE_GLCOREARB GL_SILENCE_DEPRECATION)
+
+# Use macOS OpenGL 3 Core Profile headers, silence warnings, and disable broken native window APIs
+add_compile_definitions(GLFW_INCLUDE_GLCOREARB GL_SILENCE_DEPRECATION IMGUI_IMPL_GLFW_DISABLE_NATIVE_FUNCTIONS)
 
 # 1. Fetch GLM (Header-only math)
 FetchContent_Declare(
