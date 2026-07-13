@@ -1,114 +1,200 @@
 cmake_minimum_required(VERSION 3.20)
-project(archway LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+project(
+    Archway
+    VERSION 1.0
+    LANGUAGES C CXX
+)
+
+# ==========================================================
+# C/C++ Standard
+# ==========================================================
+
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Enable FetchContent
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# ==========================================================
+# FetchContent
+# ==========================================================
+
 include(FetchContent)
 
-# 1. Fetch GLM (Header-only math)
-FetchContent_Declare(
-    glm
-    GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG 1.0.1
-)
-FetchContent_MakeAvailable(glm)
+# ==========================================================
+# GLM
+# ==========================================================
 
-# 2. Find GLFW (Installed via Homebrew)
+find_package(glm CONFIG REQUIRED)
+
+# ==========================================================
+# GLFW (installed via MSYS2/Linux package manager)
+# ==========================================================
+
 find_package(glfw3 REQUIRED)
 
-# 3. Fetch Dear ImGui
+# ==========================================================
+# OpenGL
+# ==========================================================
+
+find_package(OpenGL REQUIRED)
+
+# ==========================================================
+# Dear ImGui
+# ==========================================================
+
 FetchContent_Declare(
     imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
     GIT_TAG v1.90.5
 )
-FetchContent_GetProperties(imgui)
-if(NOT imgui_POPULATED)
-    FetchContent_Populate(imgui)
-endif()
 
-# We need to compile ImGui files manually
-set(IMGUI_SOURCES
+FetchContent_MakeAvailable(imgui)
+
+add_library(imgui STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
     ${imgui_SOURCE_DIR}/imgui_demo.cpp
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+
     ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 )
-add_library(imgui STATIC ${IMGUI_SOURCES})
+
 target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
 )
-target_link_libraries(imgui PUBLIC glfw)
 
-# 4. Fetch ImPlot
+target_link_libraries(imgui PUBLIC
+    glfw
+    OpenGL::GL
+)
+
+# ==========================================================
+# ImPlot
+# ==========================================================
+
 FetchContent_Declare(
     implot
     GIT_REPOSITORY https://github.com/epezent/implot.git
     GIT_TAG v0.16
 )
-FetchContent_GetProperties(implot)
-if(NOT implot_POPULATED)
-    FetchContent_Populate(implot)
-endif()
 
-set(IMPLOT_SOURCES
+FetchContent_MakeAvailable(implot)
+
+add_library(implot STATIC
     ${implot_SOURCE_DIR}/implot.cpp
     ${implot_SOURCE_DIR}/implot_items.cpp
     ${implot_SOURCE_DIR}/implot_demo.cpp
 )
-add_library(implot STATIC ${IMPLOT_SOURCES})
-target_include_directories(implot PUBLIC ${implot_SOURCE_DIR})
-target_link_libraries(implot PUBLIC imgui)
 
-# 5. SQLite3 (System package)
-add_executable(MyApp
-    src/main.cpp
-    third_party/sqlite/sqlite3.c
+target_include_directories(implot PUBLIC
+    ${implot_SOURCE_DIR}
 )
 
-target_include_directories(MyApp PRIVATE
-    third_party/sqlite
+target_link_libraries(implot PUBLIC
+    imgui
 )
 
-# 6. Define Archway Application
-# Include backend C files and frontend C++ files
-file(GLOB_RECURSE BACKEND_SOURCES src/backend/*.c src/backend/*.h)
-file(GLOB_RECURSE FRONTEND_SOURCES src/gui/*.cpp src/gui/*.hpp)
+# ==========================================================
+# Project Sources
+# ==========================================================
+
+file(GLOB_RECURSE BACKEND_SOURCES
+    CONFIGURE_DEPENDS
+    src/backend/*.c
+)
+
+file(GLOB_RECURSE FRONTEND_SOURCES
+    CONFIGURE_DEPENDS
+    src/gui/*.cpp
+)
+
+# ==========================================================
+# Executable
+# ==========================================================
 
 add_executable(archway
     src/main.cpp
+
     ${BACKEND_SOURCES}
     ${FRONTEND_SOURCES}
+
+    third_party/sqlite/sqlite3.c
 )
 
-# Include paths
+# ==========================================================
+# Include Directories
+# ==========================================================
+
 target_include_directories(archway PRIVATE
     src/backend
     src/gui
+
+    third_party/sqlite
 )
 
-# Link Libraries
+# ==========================================================
+# Libraries
+# ==========================================================
+
 target_link_libraries(archway PRIVATE
+    glfw
+    OpenGL::GL
+
+    glm::glm
     imgui
     implot
-    glm
-    SQLite3::SQLite3
 )
 
-# Platform-specific linking on macOS
+# ==========================================================
+# Compiler Warnings
+# ==========================================================
+
+if(MSVC)
+    target_compile_options(archway PRIVATE
+        /W4
+    )
+else()
+    target_compile_options(archway PRIVATE
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+endif()
+
+# ==========================================================
+# Windows
+# ==========================================================
+
+if(WIN32)
+    target_link_libraries(archway PRIVATE
+        opengl32
+    )
+endif()
+
+# ==========================================================
+# Linux
+# ==========================================================
+
+if(UNIX AND NOT APPLE)
+    target_link_libraries(archway PRIVATE
+        pthread
+        dl
+    )
+endif()
+
+# ==========================================================
+# macOS
+# ==========================================================
+
 if(APPLE)
     target_link_libraries(archway PRIVATE
         "-framework Cocoa"
         "-framework IOKit"
         "-framework CoreVideo"
-        "-framework OpenGL"
     )
 endif()
