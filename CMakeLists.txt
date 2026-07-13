@@ -69,7 +69,14 @@ target_include_directories(implot PUBLIC ${implot_SOURCE_DIR})
 target_link_libraries(implot PUBLIC imgui)
 
 # 5. SQLite3 (System package)
-find_package(SQLite3 REQUIRED)
+add_executable(MyApp
+    src/main.cpp
+    third_party/sqlite/sqlite3.c
+)
+
+target_include_directories(MyApp PRIVATE
+    third_party/sqlite
+)
 
 # 6. Define Archway Application
 # Include backend C files and frontend C++ files
