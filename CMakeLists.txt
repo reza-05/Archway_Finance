@@ -52,20 +52,7 @@ target_include_directories(imgui PUBLIC
 )
 target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
 
-# 2. ImPlot
-FetchContent_Declare(
-    GIT_REPOSITORY https://github.com/epezent/implot.git
-    GIT_TAG v0.16
-)
-FetchContent_MakeAvailable(implot)
-
-add_library(implot STATIC
-    ${implot_SOURCE_DIR}/implot.cpp
-    ${implot_SOURCE_DIR}/implot_items.cpp
-    ${implot_SOURCE_DIR}/implot_demo.cpp
-)
-target_include_directories(implot PUBLIC ${implot_SOURCE_DIR})
-target_link_libraries(implot PUBLIC imgui)
+# ==========================================================
 
 # ==========================================================
 # Executable Configuration
