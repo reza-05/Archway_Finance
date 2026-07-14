@@ -1,10 +1,10 @@
 #include <iostream>
 
-// Dear ImGui header
+// ImGui and ImPlot headers
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
-
+#include "implot.h"
 
 // GLFW header
 #include <GLFW/glfw3.h>
@@ -25,13 +25,12 @@ int main() {
     }
 
     // Decide GL+GLSL versions
-    // GL 3.0 + GLSL 130 is widely supported and standard for ImGui examples
     const char* glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Financial Manager - Accounts & Ledger", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(1280, 720, "Financial Manager - Dashboard", nullptr, nullptr);
     if (window == nullptr) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
@@ -43,6 +42,7 @@ int main() {
     // 2. Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImPlot::CreateContext(); // MUST initialize ImPlot after ImGui!
 
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
@@ -95,6 +95,7 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     
+    ImPlot::DestroyContext(); // Destroy ImPlot before ImGui
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
