@@ -1,0 +1,6 @@
+id,date,time,type,category,account_from_id,account_to_id,amount,notes
+1,2026-07-10,07:01 PM,Expense,Stationery & Tools,1,-1,100.00,Pencil bag
+2,2026-07-10,07:18 PM,Expense,Groceries,1,-1,30.00,3x Surf Excel Minipack
+3,2026-07-10,07:45 PM,Expense,Health & Beauty,1,-1,20.00,2x Pocket Tissue
+4,2026-07-10,11:00 PM,Income,Gifts,-1,1,10.00,Birthday Token
+5,2026-07-12,08:12 PM,Expense,Food & Drinks,1,-1,50.00,Coin chocolates x10
