@@ -25,7 +25,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # ==========================================================
-# FetchContent: Dear ImGui & ImPlot
+# FetchContent: Dear ImGui
 # ==========================================================
 include(FetchContent)
 
