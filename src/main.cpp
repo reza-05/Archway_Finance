@@ -95,7 +95,6 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     
-    ImPlot::DestroyContext(); // Destroy ImPlot before ImGui
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);
