@@ -54,7 +54,6 @@ target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
 
 # 2. ImPlot
 FetchContent_Declare(
-    implot
     GIT_REPOSITORY https://github.com/epezent/implot.git
     GIT_TAG v0.16
 )
@@ -89,7 +88,6 @@ target_link_libraries(archway PRIVATE
     OpenGL::GL
     glm::glm
     imgui
-    implot
 )
 
 # ==========================================================
