@@ -30,7 +30,6 @@ struct AppState {
     double total_expense;
 
     // Filters and UI states
-    int active_tab;           // 0: Dashboard (Charts), 1: Transactions
     int selected_account_id;  // Filter for transactions (-1 for all)
     char search_query[128];
     char filter_category[64];
