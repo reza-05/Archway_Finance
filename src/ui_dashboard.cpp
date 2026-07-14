@@ -1,6 +1,5 @@
 #include "ui_dashboard.h"
 #include "imgui.h"
-#include "implot.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
