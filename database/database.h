@@ -25,5 +25,7 @@ int add_transaction(Database *db, double amount, int is_income, const char *cate
 int save_database(const Database *db, const char *filename);
 // save data to a file
 
+int load_database(Database *db, const char *filename);
+// load data from file
 
 #endif
