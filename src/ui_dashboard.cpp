@@ -456,7 +456,7 @@ void RenderDashboardWindow(AppState& state) {
         ImGui::EndMenuBar();
     }
 
-    float sidebar_width = 300.0f;
+    float sidebar_width = 280.0f;
     float content_width = io.DisplaySize.x - sidebar_width - ImGui::GetStyle().WindowPadding.x * 2.0f - ImGui::GetStyle().ItemSpacing.x;
     
     // --- SIDEBAR (Accounts & Summary) ---
