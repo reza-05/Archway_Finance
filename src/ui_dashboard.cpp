@@ -462,7 +462,7 @@ void RenderDashboardWindow(AppState& state) {
     // --- SIDEBAR (Accounts & Summary) ---
     ImGui::BeginChild("Sidebar", ImVec2(sidebar_width, 0), true);
     
-    ImGui::Text("ARCHWAY FINANCE");
+    ImGui::Text("ARCHWAY FINANCE LEDGER");
     ImGui::Separator();
     ImGui::Spacing();
     
