@@ -138,7 +138,6 @@ static void ApplyPremiumStyle() {
 
 // AppState Implementations
 AppState::AppState() {
-    active_tab = 0;
     selected_account_id = -1;
     search_query[0] = '\0';
     filter_category[0] = '\0';
