@@ -82,7 +82,6 @@ target_include_directories(archway PRIVATE
     ${CMAKE_SOURCE_DIR}/src
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
-    ${implot_SOURCE_DIR}
 )
 
 target_link_libraries(archway PRIVATE
