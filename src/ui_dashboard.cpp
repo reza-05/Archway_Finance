@@ -7,7 +7,6 @@
 #include <iomanip>
 #include <ctime>
 #include <cstring>
-#include <map>
 
 // Common categories list
 static const char* CATEGORIES[] = {
