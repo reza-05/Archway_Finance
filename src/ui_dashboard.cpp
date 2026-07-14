@@ -421,7 +421,7 @@ bool AppState::SaveData() {
     return true;
 }
 
-// Forward Declarations for UI Parts
+// Forward Declarations
 static void RenderTransactionsTab(AppState& state);
 
 void RenderDashboardWindow(AppState& state) {
