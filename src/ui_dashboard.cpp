@@ -535,25 +535,7 @@ void RenderDashboardWindow(AppState& state) {
     // --- MAIN RIGHT CONTENT PANEL ---
     ImGui::BeginChild("RightContent", ImVec2(content_width, 0), false);
     
-    if (ImGui::BeginTabBar("MainTabs")) {
-        if (ImGui::BeginTabItem("Dashboard & Analytics")) {
-            state.active_tab = 0;
-            ImGui::EndTabItem();
-        }
-        if (ImGui::BeginTabItem("Transactions Ledger")) {
-            state.active_tab = 1;
-            ImGui::EndTabItem();
-        }
-        ImGui::EndTabBar();
-    }
-    
-    ImGui::Spacing();
-    
-    if (state.active_tab == 0) {
-        RenderCharts(state);
-    } else {
-        RenderTransactionsTab(state);
-    }
+    RenderTransactionsTab(state);
     
     ImGui::EndChild();
 
