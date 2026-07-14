@@ -31,3 +31,14 @@ int add_transaction(Database *db, double amount, int is_income, const char *cate
     db->count++;
 
 }
+
+int save_database(const Database *db, const char *filename){
+
+
+    FILE *file = fopen(filename, "wb");
+
+    fwrite(&(db->count), sizeof(int), 1, file);  // transaction count first
+
+    if(db->count > 0)
+        fwrite(db->list,sizeof(Transaction),db->count,file);   // then copy all transactions
+}
