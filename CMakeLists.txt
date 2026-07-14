@@ -99,7 +99,7 @@ else()
     target_compile_options(archway PRIVATE -Wall -Wextra -Wpedantic)
 endif()
 
-# Windows/MSYS2 specific OpenGL linking
+# Link OpenGL libs for Windows OS
 if(WIN32)
     target_link_libraries(archway PRIVATE opengl32)
 endif()
