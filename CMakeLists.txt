@@ -9,14 +9,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Enable FetchContent
 include(FetchContent)
 
-# macOS compile fixes: Use OpenGL 3, silence legacy warnings, bypass broken Apple SDK Carbon/Cocoa headers
+# Use macOS OpenGL 3 Core Profile headers and silence legacy warnings
 if(APPLE)
-    add_compile_definitions(
-        GLFW_INCLUDE_GLCOREARB 
-        GL_SILENCE_DEPRECATION 
-        GLFW_NATIVE_INCLUDE_NONE
-        "id=void*"
-    )
+    add_compile_definitions(GLFW_INCLUDE_GLCOREARB GL_SILENCE_DEPRECATION)
 endif()
 
 # 1. Fetch GLM (Header-only math)
@@ -57,6 +52,14 @@ target_include_directories(imgui PUBLIC
     ${imgui_SOURCE_DIR}/backends
 )
 target_link_libraries(imgui PUBLIC glfw)
+
+# macOS Sequoia SDK Carbon/Cocoa header compilation fixes
+if(APPLE)
+    # Bypass ApplicationServices.h and define CGDirectDisplayID to avoid CarbonCore SDK bugs
+    target_compile_definitions(imgui PRIVATE GLFW_NATIVE_INCLUDE_NONE "CGDirectDisplayID=unsigned int")
+    # Force include objc/objc.h to define 'id' cleanly without CarbonCore
+    target_compile_options(imgui PRIVATE "-include" "objc/objc.h")
+endif()
 
 # 4. Fetch ImPlot
 FetchContent_Declare(
