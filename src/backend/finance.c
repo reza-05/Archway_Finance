@@ -38,3 +38,20 @@ double calculate_monthly_income(const Database *db, const char *month_yyyy_mm)
     }
     return total;
 }
+// total expense of a month
+double calculate_monthly_expense(const Database *db, const char *month_yyyy_mm)
+{
+    if (db == NULL || month_yyyy_mm == NULL)
+        return 0.0;
+
+    double total = 0.0;
+    for (int i = 0; i < db->count; i++)
+    {
+        // minus expense if date matches
+        if (db->list[i].is_income == 0 && strncmp(db->list[i].date, month_yyyy_mm, 7) == 0)
+        {
+            total += db->list[i].amount;
+        }
+    }
+    return total;
+}
