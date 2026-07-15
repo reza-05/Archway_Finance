@@ -13,25 +13,29 @@
 #include "ui_dashboard.h"
 
 // Simple callback to print out GLFW errors if they occur
-static void glfw_error_callback(int error, const char* description) {
+static void glfw_error_callback(int error, const char *description)
+{
     std::cerr << "GLFW Error " << error << ": " << description << std::endl;
 }
 
-int main() {
+int main()
+{
     // 1. Setup window
     glfwSetErrorCallback(glfw_error_callback);
-    if (!glfwInit()) {
+    if (!glfwInit())
+    {
         return 1;
     }
 
     // Decide GL+GLSL versions
-    const char* glsl_version = "#version 130";
+    const char *glsl_version = "#version 130";
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Financial Manager - Dashboard", nullptr, nullptr);
-    if (window == nullptr) {
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "Financial Manager - Dashboard", nullptr, nullptr);
+    if (window == nullptr)
+    {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return 1;
@@ -44,8 +48,9 @@ int main() {
     ImGui::CreateContext();
     ImPlot::CreateContext(); // MUST initialize ImPlot after ImGui!
 
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    ImGuiIO &io = ImGui::GetIO();
+    (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -58,7 +63,8 @@ int main() {
     AppState app_state;
 
     // 5. Main application loop
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(window))
+    {
         // Poll and handle events (inputs, window resize, etc.)
         glfwPollEvents();
 
@@ -67,23 +73,21 @@ int main() {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // ========================================================
         // Render our custom Dashboard
-        // ========================================================
+
         RenderDashboardWindow(app_state);
 
-        // ========================================================
         // Rendering logic
-        // ========================================================
+
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        
+
         // Background color outside the ImGui windows
         glClearColor(0.1f, 0.11f, 0.12f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
-        
+
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         glfwSwapBuffers(window);
     }
@@ -94,7 +98,7 @@ int main() {
     // 6. Cleanup
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
-    
+
     ImPlot::DestroyContext(); // Destroy ImPlot before ImGui
     ImGui::DestroyContext();
 
