@@ -1,10 +1,13 @@
 cmake_minimum_required(VERSION 3.20)
-project(archway LANGUAGES C CXX)
+project(Archway VERSION 1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Export compile commands for VS Code IntelliSense (clangd / C/C++ extension)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Enable FetchContent
 include(FetchContent)
@@ -22,7 +25,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glm)
 
-# 2. Find GLFW (Installed via Homebrew)
+# 2. Find GLFW (Installed via system package manager)
 find_package(glfw3 REQUIRED)
 
 # 3. Fetch Dear ImGui
@@ -85,20 +88,23 @@ target_link_libraries(implot PUBLIC imgui)
 find_package(SQLite3 REQUIRED)
 
 # 6. Define Archway Application
-# Include backend C files and frontend C++ files
-file(GLOB_RECURSE BACKEND_SOURCES src/backend/*.c src/backend/*.h)
-file(GLOB_RECURSE FRONTEND_SOURCES src/gui/*.cpp src/gui/*.hpp)
-
+# Compile database, backend logic, and frontend together
 add_executable(archway
     src/main.cpp
-    ${BACKEND_SOURCES}
-    ${FRONTEND_SOURCES}
+    src/ui_dashboard.cpp
+    src/backend/finance.c
+    src/backend/finance.h
+    database/database.c
+    database/database.h
 )
 
 # Include paths
 target_include_directories(archway PRIVATE
-    src/backend
-    src/gui
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/database
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/backend
+    ${imgui_SOURCE_DIR}
+    ${imgui_SOURCE_DIR}/backends
 )
 
 # Link Libraries
@@ -117,4 +123,11 @@ if(APPLE)
         "-framework CoreVideo"
         "-framework OpenGL"
     )
+endif()
+
+# Compiler options
+if(MSVC)
+    target_compile_options(archway PRIVATE /W4)
+else()
+    target_compile_options(archway PRIVATE -Wall -Wextra)
 endif()
