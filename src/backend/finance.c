@@ -55,3 +55,10 @@ double calculate_monthly_expense(const Database *db, const char *month_yyyy_mm)
     }
     return total;
 }
+// net cash flow
+double calculate_net_cash_flow(const Database *db, const char *month_yyyy_mm)
+{
+    double income = calculate_monthly_income(db, month_yyyy_mm);
+    double expense = calculate_monthly_expense(db, month_yyyy_mm);
+    return income - expense;
+}
