@@ -1,0 +1,31 @@
+#ifndef DATABASE_H
+#define DATABASE_H
+#define INT_MAX 2147483647
+
+
+typedef struct {
+    int id;   
+    double amount;
+    int is_income;       // 1 for income, 0 for expense
+    char category[50];   // food,transport for piechart
+    char date[20];       // YYYY-MM-DD
+    char description[50];  
+} Transaction;
+
+typedef struct {
+    Transaction list[INT_MAX];
+    int count;              //count no of transactions
+} Database;
+
+void init_database(Database *db);     // clear memory
+
+int add_transaction(Database *db, double amount, int is_income, const char *category, const char *date, const char *description);
+// hardcode enter datas
+
+int save_database(const Database *db, const char *filename);
+// save data to a file
+
+int load_database(Database *db, const char *filename);
+// load data from file
+
+#endif
