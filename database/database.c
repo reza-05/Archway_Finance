@@ -1,5 +1,39 @@
 #include <direct.h>
 
+int storage_save_ledger(const LedgerState *state) {
+    if (!state) return 0;
+    storage_init_environment();
+
+    FILE *fa = fopen(ACCOUNTS_FILE, "wb");
+    if (fa) {
+        fwrite(&state->account_count, sizeof(int), 1, fa);
+        if (state->account_count > 0) {
+            fwrite(state->accounts, sizeof(Account), state->account_count, fa);
+        }
+        fclose(fa);
+    } else return 0;
+
+    FILE *ft = fopen(TRANSACTIONS_FILE, "wb");
+    if (ft) {
+        fwrite(&state->transaction_count, sizeof(int), 1, ft);
+        if (state->transaction_count > 0) {
+            fwrite(state->transactions, sizeof(Transaction), state->transaction_count, ft);
+        }
+        fclose(ft);
+    } else return 0;
+
+    FILE *fg = fopen(GOALS_FILE, "wb");
+    if (fg) {
+        fwrite(&state->goal_count, sizeof(int), 1, fg);
+        if (state->goal_count > 0) {
+            fwrite(state->goals, sizeof(SavingGoal), state->goal_count, fg);
+        }
+        fclose(fg);
+    } else return 0;
+
+    return 1;
+}
+
 
 int storage_load_ledger(LedgerState *state) {
     if (!state) return 0;
