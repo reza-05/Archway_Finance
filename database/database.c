@@ -1,6 +1,43 @@
 #include <direct.h>
 
 
+int storage_load_ledger(LedgerState *state) {
+    if (!state) return 0;
+    core_init_ledger(state);
+
+    FILE *fa = fopen(ACCOUNTS_FILE, "rb");
+    if (fa) {
+        fread(&state->account_count, sizeof(int), 1, fa);
+        if (state->account_count > MAX_ACCOUNTS) state->account_count = MAX_ACCOUNTS;
+        if (state->account_count > 0) {
+            fread(state->accounts, sizeof(Account), state->account_count, fa);
+        }
+        fclose(fa);
+    } else return 0;
+
+    FILE *ft = fopen(TRANSACTIONS_FILE, "rb");
+    if (ft) {
+        fread(&state->transaction_count, sizeof(int), 1, ft);
+        if (state->transaction_count > MAX_TRANSACTIONS) state->transaction_count = MAX_TRANSACTIONS;
+        if (state->transaction_count > 0) {
+            fread(state->transactions, sizeof(Transaction), state->transaction_count, ft);
+        }
+        fclose(ft);
+    }
+
+    FILE *fg = fopen(GOALS_FILE, "rb");
+    if (fg) {
+        fread(&state->goal_count, sizeof(int), 1, fg);
+        if (state->goal_count > MAX_GOALS) state->goal_count = MAX_GOALS;
+        if (state->goal_count > 0) {
+            fread(state->goals, sizeof(SavingGoal), state->goal_count, fg);
+        }
+        fclose(fg);
+    }
+
+    return 1;
+}
+
 int storage_export_transactions_csv(const LedgerState *state, const char *filepath) {
     if (!state || !filepath) return 0;
 
