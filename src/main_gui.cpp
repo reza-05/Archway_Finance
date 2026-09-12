@@ -576,6 +576,26 @@ int main(int argc, char** argv) {
                 ImGui::PopStyleColor();
             }
 
+            ImGui::Separator();
+
+            // 2. DAILY SUMMARY BANNER
+            DailySummary summary = ledger_get_daily_summary(&g_state, "");
+
+            float main_avail_w = ImGui::GetContentRegionAvail().x;
+            if (main_avail_w > 650) {
+                ImGui::TextDisabled("DAILY SUMMARY:"); ImGui::SameLine();
+                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "Today's Income: +BDT %.2f", summary.daily_income); ImGui::SameLine();
+                ImGui::TextDisabled("|"); ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "Today's Expenses: -BDT %.2f", summary.daily_expense); ImGui::SameLine();
+                ImGui::TextDisabled("|"); ImGui::SameLine();
+                ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.9f, 1.0f), "Closing Balance: BDT %.2f", summary.closing_balance);
+            } else {
+                ImGui::TextDisabled("DAILY SUMMARY:");
+                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "Income: +BDT %.2f", summary.daily_income); ImGui::SameLine();
+                ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "Expenses: -BDT %.2f", summary.daily_expense); ImGui::SameLine();
+                ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.9f, 1.0f), "Closing: BDT %.2f", summary.closing_balance);
+            }
+
     }
     return 0;
 }
