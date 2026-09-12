@@ -35,3 +35,20 @@ extern "C" {
     #include "../include/storage/storage.h"
 }
 
+static LedgerState g_state;
+static TransactionFilter g_filter;
+static const Transaction *g_filtered_transactions[MAX_TRANSACTIONS];
+static int g_filtered_count = 0;
+
+static int active_nav_tab = 0; // 0 = Ledger & Transactions, 1 = Statistics & Analytics
+
+static char search_buf[100] = "";
+static int wallet_filter_idx = 0;   // 0 = All Wallets
+static int category_filter_idx = 0; // 0 = All Categories
+
+static char g_categories[30][MAX_CAT_LEN];
+static int g_category_count = 0;
+static char wallet_names_buf[512] = "All Wallets\0";
+
+
+
