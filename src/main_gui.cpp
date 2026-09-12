@@ -596,6 +596,52 @@ int main(int argc, char** argv) {
                 ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.9f, 1.0f), "Closing: BDT %.2f", summary.closing_balance);
             }
 
+            ImGui::Separator();
+
+            // 3. RESPONSIVE FILTER TOOLBAR WITH LOAN MANAGER ACCESS
+            ImGui::TextDisabled("FILTERS:"); ImGui::SameLine();
+
+            float filter_item_w = ((main_avail_w - 300.0f) * 0.28f > 110.0f) ? ((main_avail_w - 300.0f) * 0.28f) : 110.0f;
+
+            ImGui::SetNextItemWidth(filter_item_w);
+            if (ImGui::Combo("##WalletFilter", &wallet_filter_idx, wallet_names_buf)) {
+                RefreshFilter();
+            }
+
+            ImGui::SameLine();
+
+            char cat_names_buf[512] = "All Categories\0";
+            int cat_pos = strlen("All Categories") + 1;
+            for (int i = 0; i < g_category_count; i++) {
+                int len = strlen(g_categories[i]);
+                strcpy(cat_names_buf + cat_pos, g_categories[i]);
+                cat_pos += len + 1;
+            }
+            cat_names_buf[cat_pos] = '\0';
+
+            ImGui::SetNextItemWidth(filter_item_w);
+            if (ImGui::Combo("##CategoryFilter", &category_filter_idx, cat_names_buf)) {
+                RefreshFilter();
+            }
+
+            ImGui::SameLine();
+
+            ImGui::SetNextItemWidth(filter_item_w);
+            if (ImGui::InputText("##SearchNotes", search_buf, sizeof(search_buf))) {
+                RefreshFilter();
+            }
+            if (search_buf[0] == '\0') {
+                ImGui::SameLine(); ImGui::TextDisabled("Search...");
+            }
+
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.42f, 0.36f, 0.91f, 1.00f));
+            if (ImGui::Button("Manage Loans", ImVec2(105, 24))) {
+                trigger_open_loan_manager = true;
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::Separator();
     }
     return 0;
 }
