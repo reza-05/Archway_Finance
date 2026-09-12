@@ -475,6 +475,29 @@ int main(int argc, char** argv) {
         }
         ImGui::EndChild();
 
+        ImGui::EndChild(); // Sidebar
+
+        // =========================================================================
+        // RIGHT MAIN CONTENT PANEL (WITH NAVIGATION TAB BAR)
+        // =========================================================================
+        ImGui::SameLine();
+        ImGui::BeginChild("MainContent", ImVec2(0, 0), true);
+
+        // TOP NAVIGATION TABS (Ledger vs Statistics)
+        if (ImGui::BeginTabBar("MainNavBar", ImGuiTabBarFlags_None)) {
+            if (ImGui::BeginTabItem("  Ledger & Transactions  ")) {
+                active_nav_tab = 0;
+                ImGui::EndTabItem();
+            }
+            if (ImGui::BeginTabItem("  Statistics & Analytics  ")) {
+                active_nav_tab = 1;
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+
+        ImGui::Spacing();
+
     }
     return 0;
 }
