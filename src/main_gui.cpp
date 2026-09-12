@@ -498,6 +498,26 @@ int main(int argc, char** argv) {
 
         ImGui::Spacing();
 
+        if (active_nav_tab == 0) {
+            // =====================================================================
+            // VIEW 1: LEDGER & TRANSACTIONS VIEW
+            // =====================================================================
+
+            // 1. TOP ACTION BUTTONS BAR + INLINE LOAN MANAGER BUTTON (ALWAYS 100% VISIBLE)
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.25f, 0.25f, 1.00f));
+            if (ImGui::Button("+ Add Expense", ImVec2(120, 32))) {
+                form_tx_id = -1;
+                form_tx_type = 0; // Expense
+                selected_exp_cat_idx = 0;
+                strcpy(form_tx_category, student_expense_cats[0]);
+                strcpy(form_tx_amount_str, "0.00");
+                GetCurrentFormattedDateTime(form_tx_datetime, sizeof(form_tx_datetime));
+                strcpy(form_tx_notes, "");
+                form_tx_from_idx = 0;
+                form_tx_to_idx = -1;
+                trigger_open_add_exp = true;
+            }
+            ImGui::PopStyleColor();
     }
     return 0;
 }
