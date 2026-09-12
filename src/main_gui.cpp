@@ -702,7 +702,40 @@ int main(int argc, char** argv) {
                         else ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "+BDT %.2f", tx->amount);
                     }
 
+                    // Col 7: Actions (Edit & Del Buttons)
+                    ImGui::TableSetColumnIndex(7);
 
+                    char edit_tx_btn_id[32]; snprintf(edit_tx_btn_id, sizeof(edit_tx_btn_id), "Edit##tx_%d", tx->id);
+                    if (ImGui::Button(edit_tx_btn_id, ImVec2(32, 20))) {
+                        form_tx_id = tx->id;
+                        form_tx_type = (int)tx->type;
+                        strncpy(form_tx_category, tx->category, sizeof(form_tx_category) - 1);
+                        snprintf(form_tx_amount_str, sizeof(form_tx_amount_str), "%.2f", tx->amount);
+                        strncpy(form_tx_datetime, tx->datetime, sizeof(form_tx_datetime) - 1);
+                        strncpy(form_tx_notes, tx->notes, sizeof(form_tx_notes) - 1);
+
+                        form_tx_from_idx = 0; form_tx_to_idx = 0;
+                        for (int a = 0; a < g_state.account_count; a++) {
+                            if (g_state.accounts[a].id == tx->wallet_from_id) form_tx_from_idx = a;
+                            if (g_state.accounts[a].id == tx->wallet_to_id) form_tx_to_idx = a;
+                        }
+
+                        trigger_open_edit_tx = true;
+                    }
+
+                    ImGui::SameLine();
+                    char del_tx_id[32]; snprintf(del_tx_id, sizeof(del_tx_id), "Del##tx_%d", tx->id);
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+                    if (ImGui::Button(del_tx_id, ImVec2(32, 20))) {
+                        core_delete_transaction(&g_state, tx->id);
+                        storage_save_ledger(&g_state);
+                        RefreshFilter();
+                    }
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::EndTable();
+            }
     }
     return 0;
 }
