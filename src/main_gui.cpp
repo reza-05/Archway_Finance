@@ -420,6 +420,23 @@ int main(int argc, char** argv) {
         ImGui::EndGroup();
 
         ImGui::EndChild();
+
+        ImGui::Spacing();
+
+        ImGui::TextDisabled("MY WALLETS / ACCOUNTS");
+
+        ImGui::Spacing();
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.42f, 0.36f, 0.91f, 1.00f));
+        if (ImGui::Button("+ Add Wallet", ImVec2(-1, 32))) {
+            form_acc_id = -1;
+            strcpy(form_acc_name, "Nagad MFS");
+            form_acc_type = 1;
+            strcpy(form_acc_balance_str, "0.00");
+            trigger_open_add_acc = true;
+        }
+        ImGui::PopStyleColor();
+
+        ImGui::Spacing();
     }
     return 0;
 }
