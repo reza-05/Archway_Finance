@@ -108,3 +108,4 @@ static ImU32 pie_colors_income[] = {
     IM_COL32(26, 188, 156, 255),  // Cyan
     IM_COL32(233, 30, 99, 255)    // Pink
 };
+
