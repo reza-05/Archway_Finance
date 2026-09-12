@@ -109,3 +109,32 @@ static ImU32 pie_colors_income[] = {
     IM_COL32(233, 30, 99, 255)    // Pink
 };
 
+static int form_tx_id = -1;
+static int form_tx_type = 0; // 0=Expense, 1=Income, 2=Transfer
+static char form_tx_category[30] = "";
+static char form_tx_amount_str[30] = "0.00";
+static char form_tx_datetime[25] = "";
+static char form_tx_notes[100] = "";
+static int form_tx_from_idx = 0;
+static int form_tx_to_idx = 1;
+
+
+// Overdraft prompt variables
+static double overdraft_deficit = 0.0;
+static int overdraft_cover_wallet_idx = 0;
+static bool show_overdraft_modal = false;
+
+// Formal Loan Repayment Prompt Modal variables
+static bool show_loan_repay_modal = false;
+static double repay_prompt_deposit_amount = 0.0;
+static int repay_prompt_wallet_id = -1;
+static char repay_prompt_wallet_name[50] = "";
+
+// Specific Pay Now Loan Modal Variables
+static int pay_now_target_loan_id = -1;
+static int pay_now_wallet_idx = 0;
+
+static int form_acc_id = -1;
+static char form_acc_name[50] = "";
+static int form_acc_type = 1;
+static char form_acc_balance_str[30] = "0.00";
