@@ -138,3 +138,15 @@ static int form_acc_id = -1;
 static char form_acc_name[50] = "";
 static int form_acc_type = 1;
 static char form_acc_balance_str[30] = "0.00";
+
+
+static void BuildWalletNamesBuffer() {
+    strcpy(wallet_names_buf, "All Wallets\0");
+    int buf_pos = strlen("All Wallets") + 1;
+    for (int i = 0; i < g_state.account_count; i++) {
+        int len = strlen(g_state.accounts[i].name);
+        strcpy(wallet_names_buf + buf_pos, g_state.accounts[i].name);
+        buf_pos += len + 1;
+    }
+    wallet_names_buf[buf_pos] = '\0';
+}
