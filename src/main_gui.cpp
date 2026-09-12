@@ -50,5 +50,40 @@ static char g_categories[30][MAX_CAT_LEN];
 static int g_category_count = 0;
 static char wallet_names_buf[512] = "All Wallets\0";
 
+// Global One-Shot Popup Triggers
+static bool trigger_open_add_acc = false;
+static bool trigger_open_edit_acc = false;
+static bool trigger_open_add_exp = false;
+static bool trigger_open_add_inc = false;
+static bool trigger_open_add_transfer = false;
+static bool trigger_open_edit_tx = false;
+static bool trigger_open_loan_manager = false;
+static bool trigger_open_pay_loan = false;
 
+// Pre-populated Student Life Category Presets (Ending with "Others")
+static const char* student_expense_cats[] = {
+    "Food & Dining",
+    "Stationery & Books",
+    "Tuition & Semester Fees",
+    "Transportation & Fuel",
+    "Rent & Utilities",
+    "Mobile & Data Recharge",
+    "Entertainment & Outings",
+    "Shopping & Personal",
+    "Health & Medicine",
+    "Gifts & Treats",
+    "Others"
+};
+static int selected_exp_cat_idx = 0;
+
+static const char* student_income_cats[] = {
+    "Pocket Money / Allowance",
+    "Tuition / Coaching Fee",
+    "Part-time Job / Salary",
+    "Scholarship / Stipend",
+    "Freelancing & Projects",
+    "Gift & Bonus",
+    "Others"
+};
+static int selected_inc_cat_idx = 0;
 
