@@ -219,3 +219,112 @@ static void ApplyImGuiTheme() {
     colors[ImGuiCol_Text]               = ImVec4(0.92f, 0.93f, 0.95f, 1.00f);
     colors[ImGuiCol_TextDisabled]       = ImVec4(0.59f, 0.61f, 0.65f, 1.00f);
 }
+
+// Power-Scaled Relative Angle Mapping: Strictly Monotonic (1.4% > 0.5% visually) and keeps all small slices visible
+static void CalculatePieAngles(const CategoryBreakdown* breakdown, int count, double total, float* out_angles) {
+    if (count == 0 || total <= 0.0) return;
+
+    double weight_sum = 0.0;
+    double weights[20] = {0.0};
+
+    for (int i = 0; i < count; i++) {
+        if (breakdown[i].total_spent > 0.0) {
+            double fraction = breakdown[i].total_spent / total;
+            weights[i] = pow(fraction, 0.55);
+            weight_sum += weights[i];
+        }
+    }
+
+    if (weight_sum <= 0.0) return;
+
+    for (int i = 0; i < count; i++) {
+        if (breakdown[i].total_spent <= 0.0) {
+            out_angles[i] = 0.0f;
+        } else {
+            out_angles[i] = (float)((weights[i] / weight_sum) * (3.14159265f * 2.0f));
+        }
+    }
+}
+
+// Pie Chart Renderer with Power-Scaled Angles and In-Slice Percentage Text
+static void RenderSolidPieChart(ImDrawList* draw_list, ImVec2 center, float radius, const CategoryBreakdown* breakdown, const ImU32* colors, int count, double total) {
+    if (count == 0 || total <= 0.0) {
+        draw_list->AddCircleFilled(center, radius, IM_COL32(45, 50, 60, 255));
+        draw_list->AddCircle(center, radius, IM_COL32(20, 22, 28, 255), 64, 3.0f);
+        return;
+    }
+
+    float sweep_angles[20] = {0};
+    CalculatePieAngles(breakdown, count, total, sweep_angles);
+
+    ImVec2 mouse_pos = ImGui::GetMousePos();
+    float dx = mouse_pos.x - center.x;
+    float dy = mouse_pos.y - center.y;
+    float mouse_dist = sqrtf(dx * dx + dy * dy);
+
+    float mouse_angle = atan2f(dy, dx);
+    if (mouse_angle < -3.14159265f * 0.5f) {
+        mouse_angle += 3.14159265f * 2.0f;
+    }
+
+    float current_angle = -3.14159265f * 0.5f;
+
+    for (int i = 0; i < count; i++) {
+        if (breakdown[i].total_spent <= 0.0) continue;
+
+        float sweep_angle = sweep_angles[i];
+        float next_angle = current_angle + sweep_angle;
+
+        bool is_hovered = (mouse_dist <= radius) && (mouse_angle >= current_angle && mouse_angle < next_angle);
+
+        // 1. Draw Solid Colored Pie Slice
+        ImU32 slice_col = colors[i % 9];
+        if (is_hovered) {
+            ImVec4 vec_col = ImColor(slice_col).Value;
+            float r = (vec_col.x * 1.25f > 1.0f) ? 1.0f : vec_col.x * 1.25f;
+            float g = (vec_col.y * 1.25f > 1.0f) ? 1.0f : vec_col.y * 1.25f;
+            float b = (vec_col.z * 1.25f > 1.0f) ? 1.0f : vec_col.z * 1.25f;
+            slice_col = ImColor(r, g, b, 1.0f);
+        }
+
+        draw_list->PathClear();
+        draw_list->PathLineTo(center);
+        draw_list->PathArcTo(center, radius, current_angle, next_angle, 32);
+        draw_list->PathFillConvex(slice_col);
+
+        // 2. Draw Dark Border Lines Between Slices
+        draw_list->PathClear();
+        draw_list->PathLineTo(center);
+        draw_list->PathArcTo(center, radius, current_angle, next_angle, 32);
+        draw_list->PathStroke(is_hovered ? IM_COL32(255, 255, 255, 255) : IM_COL32(20, 22, 28, 255), 0, is_hovered ? 3.5f : 2.5f);
+
+        // 3. Draw Clean In-Slice Percentage Text
+        float mid_angle = current_angle + sweep_angle * 0.5f;
+        float text_r = radius * 0.65f;
+        ImVec2 text_center = ImVec2(center.x + cosf(mid_angle) * text_r, center.y + sinf(mid_angle) * text_r);
+
+        char label_str[20];
+        snprintf(label_str, sizeof(label_str), "%.1f%%", breakdown[i].percentage);
+        ImVec2 text_sz = ImGui::CalcTextSize(label_str);
+        ImVec2 text_pos = ImVec2(text_center.x - text_sz.x * 0.5f, text_center.y - text_sz.y * 0.5f);
+
+        // Black shadow text background for crisp visibility
+        draw_list->AddText(ImVec2(text_pos.x + 1, text_pos.y + 1), IM_COL32(0, 0, 0, 240), label_str);
+        draw_list->AddText(text_pos, IM_COL32(255, 255, 255, 255), label_str);
+
+        // 4. Hover Tooltip showing Category Name + BDT Amount + Percentage
+        if (is_hovered) {
+            ImGui::BeginTooltip();
+            ImGui::TextColored(ImVec4(0.42f, 0.36f, 0.91f, 1.00f), "%s", breakdown[i].category);
+            ImGui::Separator();
+            ImGui::Text("Amount: BDT %.2f", breakdown[i].total_spent);
+            ImGui::Text("Share:  %.1f%%", breakdown[i].percentage);
+            ImGui::EndTooltip();
+        }
+
+        current_angle = next_angle;
+    }
+
+    // Outer Circle Border Outline
+    draw_list->AddCircle(center, radius, IM_COL32(20, 22, 28, 255), 64, 3.0f);
+}
