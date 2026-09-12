@@ -534,6 +534,19 @@ int main(int argc, char** argv) {
                 trigger_open_add_inc = true;
             }
             ImGui::PopStyleColor();
+
+            ImGui::SameLine();
+            if (ImGui::Button("+ Transfer", ImVec2(95, 32))) {
+                form_tx_id = -1;
+                form_tx_type = 2; // Transfer
+                strcpy(form_tx_category, "Transfer");
+                strcpy(form_tx_amount_str, "0.00");
+                GetCurrentFormattedDateTime(form_tx_datetime, sizeof(form_tx_datetime));
+                strcpy(form_tx_notes, "");
+                form_tx_from_idx = 0;
+                form_tx_to_idx = (g_state.account_count > 1) ? 1 : 0;
+                trigger_open_add_transfer = true;
+            }
     }
     return 0;
 }
