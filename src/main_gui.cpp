@@ -87,3 +87,24 @@ static const char* student_income_cats[] = {
 };
 static int selected_inc_cat_idx = 0;
 
+// High-Contrast Vibrant Color Palette for Solid Pie Chart Slices
+static ImU32 pie_colors_expense[] = {
+    IM_COL32(41, 128, 185, 255),  // Vibrant Blue
+    IM_COL32(230, 126, 34, 255),  // Bright Orange
+    IM_COL32(233, 30, 99, 255),   // Rose Pink
+    IM_COL32(155, 89, 182, 255),  // Purple
+    IM_COL32(46, 204, 113, 255),  // Emerald Green
+    IM_COL32(241, 196, 15, 255),  // Yellow Gold
+    IM_COL32(26, 188, 156, 255),  // Turquoise
+    IM_COL32(231, 76, 60, 255),   // Crimson Red
+    IM_COL32(149, 165, 166, 255)  // Cool Grey
+};
+
+static ImU32 pie_colors_income[] = {
+    IM_COL32(46, 204, 113, 255),  // Emerald Green
+    IM_COL32(41, 128, 185, 255),  // Blue
+    IM_COL32(155, 89, 182, 255),  // Purple
+    IM_COL32(241, 196, 15, 255),  // Gold
+    IM_COL32(26, 188, 156, 255),  // Cyan
+    IM_COL32(233, 30, 99, 255)    // Pink
+};
