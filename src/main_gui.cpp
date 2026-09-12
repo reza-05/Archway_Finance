@@ -186,3 +186,36 @@ static void RefreshFilter() {
     strncpy(g_filter.search_text, search_buf, MAX_NOTE_LEN - 1);
     g_filtered_count = filter_execute(&g_state, &g_filter, g_filtered_transactions, MAX_TRANSACTIONS);
 }
+
+static void ApplyImGuiTheme() {
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
+
+    style.WindowRounding = 8.0f;
+    style.FrameRounding = 5.0f;
+    style.PopupRounding = 8.0f;
+    style.ScrollbarRounding = 5.0f;
+    style.ItemSpacing = ImVec2(10, 8);
+    style.WindowPadding = ImVec2(16, 16);
+
+    colors[ImGuiCol_WindowBg]           = ImVec4(0.11f, 0.12f, 0.15f, 1.00f);
+    colors[ImGuiCol_ChildBg]            = ImVec4(0.09f, 0.10f, 0.13f, 1.00f);
+    colors[ImGuiCol_PopupBg]            = ImVec4(0.14f, 0.15f, 0.19f, 1.00f);
+    colors[ImGuiCol_Border]             = ImVec4(0.20f, 0.22f, 0.28f, 1.00f);
+    colors[ImGuiCol_FrameBg]            = ImVec4(0.07f, 0.08f, 0.10f, 1.00f);
+    colors[ImGuiCol_FrameBgHovered]     = ImVec4(0.15f, 0.16f, 0.20f, 1.00f);
+    colors[ImGuiCol_TitleBg]            = ImVec4(0.07f, 0.08f, 0.10f, 1.00f);
+    colors[ImGuiCol_TitleBgActive]      = ImVec4(0.11f, 0.12f, 0.15f, 1.00f);
+
+    // Purple Accent Colors (#6c5ce7)
+    colors[ImGuiCol_Button]             = ImVec4(0.42f, 0.36f, 0.91f, 1.00f);
+    colors[ImGuiCol_ButtonHovered]      = ImVec4(0.35f, 0.29f, 0.88f, 1.00f);
+    colors[ImGuiCol_ButtonActive]       = ImVec4(0.28f, 0.22f, 0.80f, 1.00f);
+
+    colors[ImGuiCol_Header]             = ImVec4(0.18f, 0.20f, 0.24f, 1.00f);
+    colors[ImGuiCol_HeaderHovered]      = ImVec4(0.42f, 0.36f, 0.91f, 0.50f);
+    colors[ImGuiCol_HeaderActive]       = ImVec4(0.42f, 0.36f, 0.91f, 1.00f);
+
+    colors[ImGuiCol_Text]               = ImVec4(0.92f, 0.93f, 0.95f, 1.00f);
+    colors[ImGuiCol_TextDisabled]       = ImVec4(0.59f, 0.61f, 0.65f, 1.00f);
+}
