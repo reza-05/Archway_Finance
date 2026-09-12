@@ -384,6 +384,42 @@ int main(int argc, char** argv) {
 
         float sidebar_width = (display_w < 850) ? 240.0f : ((display_w > 1400) ? 310.0f : (display_w * 0.24f));
         if (sidebar_width < 230.0f) sidebar_width = 230.0f;
+
+        // LEFT SIDEBAR (STATIONARY)
+        ImGui::BeginChild("Sidebar", ImVec2(sidebar_width, 0), true);
+
+        ImGui::TextDisabled("ARCHWAY LEDGER");
+        ImGui::Spacing();
+
+        // Total Balance Card
+        ImGui::BeginChild("BalanceCard", ImVec2(0, 115), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+        ImGui::TextDisabled("TOTAL BALANCE");
+
+        double total_balance = core_get_total_balance(&g_state);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 0.72f, 0.58f, 1.0f));
+        ImGui::SetWindowFontScale(1.3f);
+        ImGui::Text("BDT %.2f", total_balance);
+        ImGui::SetWindowFontScale(1.0f);
+        ImGui::PopStyleColor();
+
+        ImGui::Separator();
+
+        double total_inc = core_get_total_income(&g_state);
+        double total_exp = core_get_total_expense(&g_state);
+
+        float half_w = (ImGui::GetContentRegionAvail().x - 10) * 0.5f;
+        ImGui::BeginGroup();
+        ImGui::TextDisabled("Total Income");
+        ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "+%.2f", total_inc);
+        ImGui::EndGroup();
+
+        ImGui::SameLine(half_w + 10);
+        ImGui::BeginGroup();
+        ImGui::TextDisabled("Total Expenses");
+        ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "-%.2f", total_exp);
+        ImGui::EndGroup();
+
+        ImGui::EndChild();
     }
     return 0;
 }
