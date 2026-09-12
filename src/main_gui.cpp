@@ -139,7 +139,6 @@ static char form_acc_name[50] = "";
 static int form_acc_type = 1;
 static char form_acc_balance_str[30] = "0.00";
 
-
 static void BuildWalletNamesBuffer() {
     strcpy(wallet_names_buf, "All Wallets\0");
     int buf_pos = strlen("All Wallets") + 1;
@@ -149,4 +148,19 @@ static void BuildWalletNamesBuffer() {
         buf_pos += len + 1;
     }
     wallet_names_buf[buf_pos] = '\0';
+}
+
+static void GetCurrentFormattedDateTime(char* out_buf, size_t buf_size) {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    if (!t) {
+        snprintf(out_buf, buf_size, "2026-08-25 12:00 PM");
+        return;
+    }
+    int hour12 = t->tm_hour % 12;
+    if (hour12 == 0) hour12 = 12;
+    const char* ampm = (t->tm_hour >= 12) ? "PM" : "AM";
+    snprintf(out_buf, buf_size, "%04d-%02d-%02d %02d:%02d %s",
+             t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+             hour12, t->tm_min, ampm);
 }
