@@ -642,6 +642,19 @@ int main(int argc, char** argv) {
             ImGui::PopStyleColor();
 
             ImGui::Separator();
+
+            // 4. TRANSACTION HISTORY TABLE V6 (SCROLLABLE & FIXED FIT SO EDIT/DEL BUTTONS & AMOUNT ARE ALWAYS ACCESSIBLE)
+            if (ImGui::BeginTable("LedgerTransactionsTableV6", 8, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_Resizable)) {
+                ImGui::TableSetupColumn("Date/Time", ImGuiTableColumnFlags_WidthFixed, 115.0f);
+                ImGui::TableSetupColumn("Type", ImGuiTableColumnFlags_WidthFixed, 55.0f);
+                ImGui::TableSetupColumn("Category", ImGuiTableColumnFlags_WidthFixed, 95.0f);
+                ImGui::TableSetupColumn("Wallet From", ImGuiTableColumnFlags_WidthFixed, 75.0f);
+                ImGui::TableSetupColumn("Wallet To", ImGuiTableColumnFlags_WidthFixed, 75.0f);
+                ImGui::TableSetupColumn("Notes", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+                ImGui::TableSetupColumn("Amount", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+                ImGui::TableSetupColumn("Actions", ImGuiTableColumnFlags_WidthFixed, 85.0f);
+                ImGui::TableHeadersRow();
+
     }
     return 0;
 }
