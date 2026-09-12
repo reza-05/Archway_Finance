@@ -1,4 +1,4 @@
-/**
+/*
  * ARCHWAY FINANCE - Dear ImGui Desktop GUI Application Wrapper
  *
  * File: src/gui/main_gui.cpp
@@ -12,3 +12,26 @@
  * - Wallet choice selection for single-click loan settlement.
  * - Minimum arc angle solid pie chart rendering (150px radius).
  */
+
+#define GLFW_INCLUDE_NONE
+#include <OpenGL/gl3.h>
+#include <GLFW/glfw3.h>
+
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
+
+extern "C" {
+    #include "../include/models.h"
+    #include "../include/core/core_engine.h"
+    #include "../include/core/lallkhata_engine.h"
+    #include "../include/core/search_filter.h"
+    #include "../include/storage/storage.h"
+}
+
