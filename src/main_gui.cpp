@@ -328,3 +328,9 @@ static void RenderSolidPieChart(ImDrawList* draw_list, ImVec2 center, float radi
     // Outer Circle Border Outline
     draw_list->AddCircle(center, radius, IM_COL32(20, 22, 28, 255), 64, 3.0f);
 }
+
+int main(int argc, char** argv) {
+    (void)argc; (void)argv;
+
+        return 0;
+}
