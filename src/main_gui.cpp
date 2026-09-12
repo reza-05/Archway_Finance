@@ -655,6 +655,54 @@ int main(int argc, char** argv) {
                 ImGui::TableSetupColumn("Actions", ImGuiTableColumnFlags_WidthFixed, 85.0f);
                 ImGui::TableHeadersRow();
 
+                for (int i = 0; i < g_filtered_count; i++) {
+                    const Transaction* tx = g_filtered_transactions[i];
+                    Account* from_acc = core_find_account(&g_state, tx->wallet_from_id);
+                    Account* to_acc = core_find_account(&g_state, tx->wallet_to_id);
+
+                    bool is_loan_category = (strcmp(tx->category, "Loan / Credit") == 0 ||
+                                             strcmp(tx->category, "Loan / Credit Entry") == 0 ||
+                                             strstr(tx->notes, "[Loan") != NULL);
+                    bool is_paid = core_is_loan_paid(tx);
+
+                    ImGui::TableNextRow();
+                    // Col 0: Date/Time
+                    ImGui::TableSetColumnIndex(0); ImGui::Text("%s", tx->datetime);
+
+                    // Col 1: Type
+                    ImGui::TableSetColumnIndex(1);
+                    if (tx->type == TRANSACTION_INCOME) ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "Income");
+                    else if (tx->type == TRANSACTION_EXPENSE) ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "Expense");
+                    else ImGui::TextColored(ImVec4(0.2f, 0.6f, 0.9f, 1.0f), "Transfer");
+
+                    // Col 2: Category
+                    ImGui::TableSetColumnIndex(2); ImGui::Text("%s", tx->category);
+
+                    // Col 3: Wallet From
+                    ImGui::TableSetColumnIndex(3); ImGui::Text("%s", from_acc ? from_acc->name : "-");
+
+                    // Col 4: Wallet To
+                    ImGui::TableSetColumnIndex(4); ImGui::Text("%s", to_acc ? to_acc->name : "-");
+
+                    // Col 5: Notes
+                    ImGui::TableSetColumnIndex(5); ImGui::Text("%s", tx->notes);
+
+                    // Col 6: Amount (RED WHEN UNPAID, GREEN WHEN PAID - AMOUNT PRESERVED & NOT SET TO ZERO!)
+                    ImGui::TableSetColumnIndex(6);
+                    if (is_loan_category) {
+                        if (is_paid) {
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(20, 140, 60, 220));
+                            ImGui::TextColored(ImVec4(0.9f, 1.0f, 0.9f, 1.0f), "+BDT %.2f", tx->amount);
+                        } else {
+                            ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, IM_COL32(180, 25, 25, 230));
+                            ImGui::TextColored(ImVec4(1.0f, 0.95f, 0.95f, 1.0f), "+BDT %.2f", tx->amount);
+                        }
+                    } else {
+                        if (tx->type == TRANSACTION_EXPENSE) ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "-BDT %.2f", tx->amount);
+                        else ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "+BDT %.2f", tx->amount);
+                    }
+
+
     }
     return 0;
 }
