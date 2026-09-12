@@ -547,6 +547,35 @@ int main(int argc, char** argv) {
                 form_tx_to_idx = (g_state.account_count > 1) ? 1 : 0;
                 trigger_open_add_transfer = true;
             }
+
+            // TOP ACTION BAR INTERACTIVE LOAN MANAGER BUTTON (INLINE PLACED)
+            double outstanding_loan = core_get_outstanding_loan_balance(&g_state);
+            double total_loan_taken = core_get_total_loan_taken(&g_state);
+
+            char loan_btn_label[64];
+            if (outstanding_loan > 0.0) {
+                snprintf(loan_btn_label, sizeof(loan_btn_label), "[!] LOAN: BDT %.2f UNPAID", outstanding_loan);
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.85f, 0.2f, 0.2f, 1.00f));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.95f, 0.3f, 0.3f, 1.00f));
+                if (ImGui::Button(loan_btn_label, ImVec2(215, 32))) {
+                    trigger_open_loan_manager = true;
+                }
+                ImGui::PopStyleColor(2);
+            } else {
+                if (total_loan_taken > 0.0) {
+                    snprintf(loan_btn_label, sizeof(loan_btn_label), "LOANS: BDT %.2f (ALL PAID)", total_loan_taken);
+                } else {
+                    snprintf(loan_btn_label, sizeof(loan_btn_label), "LOANS: BDT 0.00 (NO LOAN)");
+                }
+                ImGui::SameLine();
+                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.55f, 0.35f, 1.00f));
+                if (ImGui::Button(loan_btn_label, ImVec2(215, 32))) {
+                    trigger_open_loan_manager = true;
+                }
+                ImGui::PopStyleColor();
+            }
+
     }
     return 0;
 }
