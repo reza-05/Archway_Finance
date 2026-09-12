@@ -518,6 +518,22 @@ int main(int argc, char** argv) {
                 trigger_open_add_exp = true;
             }
             ImGui::PopStyleColor();
+
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.65f, 0.45f, 1.00f));
+            if (ImGui::Button("+ Add Income", ImVec2(120, 32))) {
+                form_tx_id = -1;
+                form_tx_type = 1; // Income
+                selected_inc_cat_idx = 0;
+                strcpy(form_tx_category, student_income_cats[0]);
+                strcpy(form_tx_amount_str, "0.00");
+                GetCurrentFormattedDateTime(form_tx_datetime, sizeof(form_tx_datetime));
+                strcpy(form_tx_notes, "");
+                form_tx_from_idx = -1;
+                form_tx_to_idx = 0;
+                trigger_open_add_inc = true;
+            }
+            ImGui::PopStyleColor();
     }
     return 0;
 }
