@@ -164,3 +164,25 @@ static void GetCurrentFormattedDateTime(char* out_buf, size_t buf_size) {
              t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
              hour12, t->tm_min, ampm);
 }
+
+static void RefreshFilter() {
+    ledger_recalculate_running_balances(&g_state);
+
+    g_category_count = core_get_unique_categories(&g_state, g_categories, 30);
+    BuildWalletNamesBuffer();
+
+    if (wallet_filter_idx == 0) {
+        g_filter.wallet_id_filter = -1;
+    } else if (wallet_filter_idx - 1 < g_state.account_count) {
+        g_filter.wallet_id_filter = g_state.accounts[wallet_filter_idx - 1].id;
+    }
+
+    if (category_filter_idx == 0) {
+        g_filter.category_filter[0] = '\0';
+    } else if (category_filter_idx - 1 < g_category_count) {
+        strncpy(g_filter.category_filter, g_categories[category_filter_idx - 1], MAX_CAT_LEN - 1);
+    }
+
+    strncpy(g_filter.search_text, search_buf, MAX_NOTE_LEN - 1);
+    g_filtered_count = filter_execute(&g_state, &g_filter, g_filtered_transactions, MAX_TRANSACTIONS);
+}
