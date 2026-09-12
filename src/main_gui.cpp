@@ -353,5 +353,37 @@ int main(int argc, char** argv) {
 
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 150");
+
+    storage_init_environment();
+    if (!storage_load_ledger(&g_state) || g_state.account_count == 0) {
+        storage_seed_initial_data(&g_state);
+    }
+
+    for (int i = 0; i < g_state.account_count; i++) {
+        if (g_state.accounts[i].current_balance < 0.0) {
+            g_state.accounts[i].current_balance = 0.0;
+        }
+    }
+
+    filter_init_default(&g_filter);
+    RefreshFilter();
+
+    while (!glfwWindowShouldClose(window)) {
+        glfwPollEvents();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+
+        ImGui::SetNextWindowPos(ImVec2(0, 0));
+        ImGui::SetNextWindowSize(ImVec2((float)display_w, (float)display_h));
+        ImGui::Begin("MainDockWindow", NULL, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse);
+
+        float sidebar_width = (display_w < 850) ? 240.0f : ((display_w > 1400) ? 310.0f : (display_w * 0.24f));
+        if (sidebar_width < 230.0f) sidebar_width = 230.0f;
+    }
     return 0;
 }
