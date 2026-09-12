@@ -437,6 +437,44 @@ int main(int argc, char** argv) {
         ImGui::PopStyleColor();
 
         ImGui::Spacing();
+
+        // Wallets Cards List
+        ImGui::BeginChild("WalletsList", ImVec2(0, 0), false);
+
+        for (int i = 0; i < g_state.account_count; i++) {
+            Account* acc = &g_state.accounts[i];
+            char card_id[32]; snprintf(card_id, sizeof(card_id), "WCard_%d", acc->id);
+
+            ImGui::BeginChild(card_id, ImVec2(0, 80), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+            ImGui::Text("%s", acc->name);
+            ImGui::SameLine(ImGui::GetContentRegionAvail().x - 55);
+            ImGui::TextDisabled("%s", get_account_type_str(acc->type));
+
+            ImGui::Text("BDT %.2f", acc->current_balance);
+
+            char edit_acc_btn_id[32]; snprintf(edit_acc_btn_id, sizeof(edit_acc_btn_id), "Edit##acc_%d", acc->id);
+            if (ImGui::Button(edit_acc_btn_id, ImVec2(45, 20))) {
+                form_acc_id = acc->id;
+                strncpy(form_acc_name, acc->name, sizeof(form_acc_name) - 1);
+                form_acc_type = (int)acc->type;
+                snprintf(form_acc_balance_str, sizeof(form_acc_balance_str), "%.2f", acc->current_balance);
+                trigger_open_edit_acc = true;
+            }
+
+            char delete_btn_id[32]; snprintf(delete_btn_id, sizeof(delete_btn_id), "Del##acc_%d", acc->id);
+            ImGui::SameLine();
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.7f, 0.2f, 0.2f, 1.0f));
+            if (ImGui::Button(delete_btn_id, ImVec2(45, 20))) {
+                core_delete_account(&g_state, acc->id);
+                storage_save_ledger(&g_state);
+                RefreshFilter();
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::EndChild();
+        }
+        ImGui::EndChild();
+
     }
     return 0;
 }
