@@ -938,6 +938,41 @@ int main(int argc, char** argv) {
         if (trigger_open_loan_manager) { ImGui::OpenPopup("Loan & Credit Ledger Manager"); trigger_open_loan_manager = false; }
         if (trigger_open_pay_loan) { ImGui::OpenPopup("Pay Now - Wallet Selection"); trigger_open_pay_loan = false; }
 
+         // =========================================================================
+        // MODAL 1: ADD / EDIT WALLET ACCOUNT
+        // =========================================================================
+        ImGui::SetNextWindowSize(ImVec2(520, 340), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Add New Wallet Account", NULL, ImGuiWindowFlags_None) ||
+            ImGui::BeginPopupModal("Edit Wallet Account", NULL, ImGuiWindowFlags_None)) {
+            
+            if (ImGui::IsMouseClicked(0) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)) {
+                ImGui::CloseCurrentPopup();
+            }
+            
+            bool is_edit = (form_acc_id > 0);
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(0.42f, 0.36f, 0.91f, 1.00f), is_edit ? "MODIFY WALLET ACCOUNT DETAILS" : "CREATE NEW WALLET ACCOUNT");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Text("Account Name:");
+            ImGui::SetNextItemWidth(480);
+            ImGui::InputText("##FormAccName", form_acc_name, sizeof(form_acc_name));
+
+            ImGui::Spacing();
+            ImGui::Text("Account Type:");
+            ImGui::SetNextItemWidth(480);
+            ImGui::Combo("##FormAccType", &form_acc_type, "Cash\0MFS (bKash/Nagad/Rocket)\0Card (Debit/Credit)\0Savings Account\0Bank Account\0");
+
+            ImGui::Spacing();
+            ImGui::Text("Initial Balance (BDT - Numeric Only):");
+            ImGui::SetNextItemWidth(480);
+            ImGui::InputText("##FormAccBal", form_acc_balance_str, sizeof(form_acc_balance_str), ImGuiInputTextFlags_CharsDecimal);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
  
  
     return 0;
