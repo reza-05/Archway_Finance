@@ -59,3 +59,22 @@ int core_update_account(LedgerState *state, int account_id, const char *new_name
     return 1;
 }
 
+int core_delete_account(LedgerState *state, int account_id) {
+    if (!state) return 0;
+
+    int index = -1;
+    for (int i = 0; i < state->account_count; i++) {
+        if (state->accounts[i].id == account_id) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) return 0;
+
+    for (int i = index; i < state->account_count - 1; i++) {
+        state->accounts[i] = state->accounts[i + 1];
+    }
+    state->account_count--;
+    return 1;
+}
+
