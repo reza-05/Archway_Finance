@@ -1003,7 +1003,56 @@ int main(int argc, char** argv) {
             ImGui::EndPopup();
         }
 
- 
+         // =========================================================================
+        // MODAL 2: TRANSACTION FORM WITH NUMERIC-ONLY AMOUNT INPUT
+        // =========================================================================
+        ImGui::SetNextWindowSize(ImVec2(560, 520), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Add Expense Record", NULL, ImGuiWindowFlags_None) ||
+            ImGui::BeginPopupModal("Add Income Record", NULL, ImGuiWindowFlags_None) ||
+            ImGui::BeginPopupModal("Transfer Funds Between Wallets", NULL, ImGuiWindowFlags_None) ||
+            ImGui::BeginPopupModal("Edit Record Details", NULL, ImGuiWindowFlags_None)) {
+            
+            if (ImGui::IsMouseClicked(0) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)) {
+                ImGui::CloseCurrentPopup();
+            }
+            
+            ImGui::Spacing();
+            
+            const char* header_str = (form_tx_type == 0) ? "RECORD EXPENSE (-BDT)" : 
+                                    ((form_tx_type == 1) ? "RECORD INCOME (+BDT)" : "TRANSFER BETWEEN ACTIVE WALLETS");
+            ImVec4 header_color = (form_tx_type == 0) ? ImVec4(1.0f, 0.46f, 0.46f, 1.0f) : 
+                                 ((form_tx_type == 1) ? ImVec4(0.0f, 0.72f, 0.58f, 1.0f) : ImVec4(0.42f, 0.36f, 0.91f, 1.00f));
+            
+            ImGui::TextColored(header_color, "%s", header_str);
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 1. DYNAMIC WALLET SELECTION
+            if (form_tx_type == 0) {
+                ImGui::Text("Pay From Wallet:");
+                ImGui::SetNextItemWidth(520);
+                ImGui::Combo("##FormTxFrom", &form_tx_from_idx, wallet_names_buf + strlen("All Wallets") + 1);
+            } else if (form_tx_type == 1) {
+                ImGui::Text("Deposit To Wallet:");
+                ImGui::SetNextItemWidth(520);
+                ImGui::Combo("##FormTxTo", &form_tx_to_idx, wallet_names_buf + strlen("All Wallets") + 1);
+            } else {
+                float half_field_w = 250.0f;
+                ImGui::BeginGroup();
+                ImGui::Text("Transfer From (Active Wallet):");
+                ImGui::SetNextItemWidth(half_field_w);
+                ImGui::Combo("##FormTxFrom", &form_tx_from_idx, wallet_names_buf + strlen("All Wallets") + 1);
+                ImGui::EndGroup();
+
+                ImGui::SameLine(280);
+                ImGui::BeginGroup();
+                ImGui::Text("Transfer To (Active Wallet):");
+                ImGui::SetNextItemWidth(half_field_w);
+                ImGui::Combo("##FormTxTo", &form_tx_to_idx, wallet_names_buf + strlen("All Wallets") + 1);
+                ImGui::EndGroup();
+            }
+
+
  
     return 0;
 }
