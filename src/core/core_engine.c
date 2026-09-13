@@ -362,7 +362,6 @@ int core_update_transaction(LedgerState *state, int tx_id, int wallet_from_id, i
     return 1;
 }
 
-
 int core_delete_transaction(LedgerState *state, int tx_id) {
     int idx = -1;
     for (int i = 0; i < state->transaction_count; i++) {
@@ -387,6 +386,37 @@ int core_delete_transaction(LedgerState *state, int tx_id) {
         Account *to = core_find_account(state, tx->wallet_to_id);
         if (from) from->current_balance += tx->amount;
         if (to) to->current_balance -= tx->amount;
+    }
+
+    // IF DELETING A LOAN REPAYMENT: Revert target loan status from PAID back to UNPAID
+    if (strcmp(tx->category, "Loan Repayment") == 0 || strcmp(tx->category, "Loan Repay") == 0 || strstr(tx->notes, "[Repaid Loan #") != NULL) {
+        int target_loan_id = -1;
+        const char *loan_id_ptr = strstr(tx->notes, "[Repaid Loan #");
+        if (loan_id_ptr) {
+            target_loan_id = atoi(loan_id_ptr + strlen("[Repaid Loan #"));
+        }
+
+        for (int i = 0; i < state->transaction_count; i++) {
+            if (i == idx) continue;
+            Transaction *other_tx = &state->transactions[i];
+
+            bool matches_loan = (target_loan_id > 0) ? (other_tx->id == target_loan_id) :
+                                ((strcmp(other_tx->category, "Loan / Credit") == 0) && core_is_loan_paid(other_tx));
+
+            if (matches_loan) {
+                // Strip "[PAID] " or "[REPAID] " from note
+                char *paid_ptr = strstr(other_tx->notes, "[PAID] ");
+                if (paid_ptr) {
+                    memmove(paid_ptr, paid_ptr + strlen("[PAID] "), strlen(paid_ptr + strlen("[PAID] ")) + 1);
+                } else {
+                    char *repaid_ptr = strstr(other_tx->notes, "[REPAID] ");
+                    if (repaid_ptr) {
+                        memmove(repaid_ptr, repaid_ptr + strlen("[REPAID] "), strlen(repaid_ptr + strlen("[REPAID] ")) + 1);
+                    }
+                }
+                if (target_loan_id > 0) break; // Reverted specific target loan
+            }
+        }
     }
 
     for (int i = idx; i < state->transaction_count - 1; i++) {
