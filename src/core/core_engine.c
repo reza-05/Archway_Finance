@@ -149,3 +149,34 @@ double core_get_total_loan_balance(const LedgerState *state) {
     return core_get_outstanding_loan_balance(state);
 }
 
+int core_pay_specific_loan(LedgerState *state, int loan_tx_id, int wallet_id, const char *datetime) {
+    if (!state) return -1;
+    Transaction *target_tx = NULL;
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].id == loan_tx_id) {
+            target_tx = &state->transactions[i];
+            break;
+        }
+    }
+
+    if (!target_tx || core_is_loan_paid(target_tx)) return 0;
+
+    Account *paying_acc = core_find_account(state, wallet_id);
+    if (!paying_acc || paying_acc->current_balance < target_tx->amount) {
+        return -2; // Insufficient balance in paying wallet
+    }
+
+    // Prepend [PAID] tag to transaction notes
+    char updated_notes[MAX_NOTE_LEN];
+    snprintf(updated_notes, sizeof(updated_notes), "[PAID] %s", target_tx->notes);
+    strncpy(target_tx->notes, updated_notes, MAX_NOTE_LEN - 1);
+    target_tx->notes[MAX_NOTE_LEN - 1] = '\0';
+
+    // Record Loan Repayment Expense
+    char repay_note[100];
+    snprintf(repay_note, sizeof(repay_note), "[Repaid Loan #%d of BDT %.2f]", target_tx->id, target_tx->amount);
+    core_add_transaction(state, wallet_id, -1, TRANSACTION_EXPENSE, "Loan Repayment", target_tx->amount, datetime, repay_note);
+
+    return 1;
+}
+
