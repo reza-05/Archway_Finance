@@ -425,6 +425,13 @@ int core_delete_transaction(LedgerState *state, int tx_id) {
     state->transaction_count--;
 
     // Double check safeguard: Ensure no balance is negative
+    for (int i = 0; i < state->account_count; i++) {
+        if (state->accounts[i].current_balance < 0.0) {
+            state->accounts[i].current_balance = 0.0;
+        }
+    }
 
+    ledger_recalculate_running_balances(state);
     return 1;
 }
+
