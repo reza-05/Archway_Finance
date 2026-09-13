@@ -78,3 +78,13 @@ int core_delete_account(LedgerState *state, int account_id) {
     return 1;
 }
 
+Account* core_find_account(LedgerState *state, int account_id) {
+    if (!state || account_id <= 0) return NULL;
+    for (int i = 0; i < state->account_count; i++) {
+        if (state->accounts[i].id == account_id) {
+            return &state->accounts[i];
+        }
+    }
+    return NULL;
+}
+
