@@ -554,3 +554,9 @@ int core_get_type_category_breakdown(const LedgerState *state, TransactionType t
     return cat_count;
 }
 
+int core_predict_months_to_goal_recursive(double current_saved, double target, double monthly_savings_rate, int month_counter) {
+    if (current_saved >= target) return month_counter;
+    if (monthly_savings_rate <= 0.0 || month_counter > 360) return -1;
+    return core_predict_months_to_goal_recursive(current_saved + monthly_savings_rate, target, monthly_savings_rate, month_counter + 1);
+}
+
