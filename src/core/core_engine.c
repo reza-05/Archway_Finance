@@ -514,3 +514,43 @@ double core_get_monthly_income(const LedgerState *state, int year, int month) {
 }
 
 int core_get_category_breakdown(const LedgerState *state, CategoryBreakdown *output, int max_categories) {
+    return core_get_type_category_breakdown(state, TRANSACTION_EXPENSE, output, max_categories);
+}
+
+int core_get_type_category_breakdown(const LedgerState *state, TransactionType tx_type, CategoryBreakdown *output, int max_categories) {
+    int cat_count = 0;
+    double total_sum = (tx_type == TRANSACTION_INCOME) ? core_get_total_income(state) : core_get_total_expense(state);
+
+    if (total_sum <= 0.0) return 0;
+
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].type != tx_type) continue;
+
+        const char *cat_name = state->transactions[i].category;
+        double amt = state->transactions[i].amount;
+
+        int found_idx = -1;
+        for (int j = 0; j < cat_count; j++) {
+            if (strcmp(output[j].category, cat_name) == 0) {
+                found_idx = j;
+                break;
+            }
+        }
+
+        if (found_idx >= 0) {
+            output[found_idx].total_spent += amt;
+        } else if (cat_count < max_categories) {
+            strncpy(output[cat_count].category, cat_name, MAX_CAT_LEN - 1);
+            output[cat_count].category[MAX_CAT_LEN - 1] = '\0';
+            output[cat_count].total_spent = amt;
+            cat_count++;
+        }
+    }
+
+    for (int i = 0; i < cat_count; i++) {
+        output[i].percentage = (output[i].total_spent / total_sum) * 100.0;
+    }
+
+    return cat_count;
+}
+
