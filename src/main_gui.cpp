@@ -799,6 +799,51 @@ int main(int argc, char** argv) {
             ImGui::Separator();
             ImGui::Spacing();
 
+              // 2. 100% RESPONSIVE PIE CHARTS WITH AUTO-FIT LEGENDS
+            bool side_by_side = (avail_w >= 1050.0f);
+            float chart_panel_w = side_by_side ? ((avail_w - 15.0f) * 0.5f) : (avail_w - 5.0f);
+            float panel_h = 360.0f;
+
+            // --- EXPENSE SOLID PIE CHART PANEL ---
+            ImGui::BeginChild("ExpensePiePanel", ImVec2(chart_panel_w, panel_h), true);
+            ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "EXPENSE CATEGORY PIE CHART");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            CategoryBreakdown exp_breakdown[20];
+            int exp_cat_count = core_get_type_category_breakdown(&g_state, TRANSACTION_EXPENSE, exp_breakdown, 20);
+
+            // Pie chart positioning
+            float pie_cx = (chart_panel_w > 450.0f) ? 140.0f : (chart_panel_w * 0.5f);
+            ImVec2 pie_center = ImVec2(ImGui::GetCursorScreenPos().x + pie_cx, ImGui::GetCursorScreenPos().y + 145);
+            RenderSolidPieChart(ImGui::GetWindowDrawList(), pie_center, 115.0f, exp_breakdown, pie_colors_expense, exp_cat_count, total_exp);
+
+            if (chart_panel_w > 450.0f) {
+                ImGui::SetCursorPosX(270.0f);
+                ImGui::BeginChild("ExpLegend", ImVec2(chart_panel_w - 280.0f, 290), false);
+            } else {
+                ImGui::SetCursorPosY(285.0f);
+                ImGui::BeginChild("ExpLegend", ImVec2(0, 180), false);
+            }
+
+            if (exp_cat_count == 0 || total_exp <= 0.0) {
+                ImGui::TextDisabled("No expense records logged yet.");
+            } else {
+                ImGui::TextDisabled("Expense Category Legend");
+                ImGui::Spacing();
+                for (int e = 0; e < exp_cat_count; e++) {
+                    ImU32 col = pie_colors_expense[e % 9];
+                    ImVec4 vec_col = ImColor(col).Value;
+                    ImGui::ColorButton("##exp_col", vec_col, ImGuiColorEditFlags_NoTooltip, ImVec2(12, 12));
+                    ImGui::SameLine();
+                    ImGui::Text("%s:", exp_breakdown[e].category);
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "%.1f%% (BDT %.0f)", exp_breakdown[e].percentage, exp_breakdown[e].total_spent);
+                }
+            }
+            ImGui::EndChild();
+            ImGui::EndChild(); // ExpensePiePanel
+
   
     return 0;
 }
