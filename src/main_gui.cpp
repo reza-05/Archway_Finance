@@ -926,6 +926,19 @@ int main(int argc, char** argv) {
 
         ImGui::EndChild(); // MainContent
 
+        // =========================================================================
+        // GLOBAL ONE-SHOT POPUP DISPATCHERS (TRIGGERED AT ROOT SCOPE FOR 100% RELIABILITY)
+        // =========================================================================
+        if (trigger_open_add_acc) { ImGui::OpenPopup("Add New Wallet Account"); trigger_open_add_acc = false; }
+        if (trigger_open_edit_acc) { ImGui::OpenPopup("Edit Wallet Account"); trigger_open_edit_acc = false; }
+        if (trigger_open_add_exp) { ImGui::OpenPopup("Add Expense Record"); trigger_open_add_exp = false; }
+        if (trigger_open_add_inc) { ImGui::OpenPopup("Add Income Record"); trigger_open_add_inc = false; }
+        if (trigger_open_add_transfer) { ImGui::OpenPopup("Transfer Funds Between Wallets"); trigger_open_add_transfer = false; }
+        if (trigger_open_edit_tx) { ImGui::OpenPopup("Edit Record Details"); trigger_open_edit_tx = false; }
+        if (trigger_open_loan_manager) { ImGui::OpenPopup("Loan & Credit Ledger Manager"); trigger_open_loan_manager = false; }
+        if (trigger_open_pay_loan) { ImGui::OpenPopup("Pay Now - Wallet Selection"); trigger_open_pay_loan = false; }
+
+ 
  
     return 0;
 }
