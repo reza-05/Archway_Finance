@@ -1213,7 +1213,22 @@ int main(int argc, char** argv) {
                 }
             }
 
-  
+             ImGui::Spacing();
+
+            // OPTION B: RECORD LOAN / CREDIT ENTRY
+            ImGui::Text("Option B: Record a Loan / Credit Entry:");
+            ImGui::SameLine(360);
+            if (ImGui::Button("Take Loan & Pay", ImVec2(150, 26))) {
+                core_add_transaction_with_overdraft(&g_state, from_id, -1, (TransactionType)form_tx_type,
+                                                    form_tx_category, parsed_amount, form_tx_datetime, form_tx_notes,
+                                                    OVERDRAFT_COVER_LOAN, -1);
+                storage_save_ledger(&g_state);
+                RefreshFilter();
+                show_overdraft_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+   
  
     return 0;
 }
