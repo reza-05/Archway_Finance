@@ -288,6 +288,14 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
         if (to) to->current_balance += amount;
     }
 
+    // Double check safeguard: Ensure no balance is negative
+    for (int i = 0; i < state->account_count; i++) {
+        if (state->accounts[i].current_balance < 0.0) {
+            state->accounts[i].current_balance = 0.0;
+        }
+    }
 
+    state->transaction_count++;
+    ledger_recalculate_running_balances(state);
     return tx->id;
 }
