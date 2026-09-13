@@ -105,3 +105,17 @@ int core_is_loan_paid(const Transaction *tx) {
     return 0;
 }
 
+double core_get_total_loan_taken(const LedgerState *state) {
+    if (!state) return 0.0;
+    double loan_taken = 0.0;
+    for (int i = 0; i < state->transaction_count; i++) {
+        const Transaction *tx = &state->transactions[i];
+        if (strcmp(tx->category, "Loan / Credit") == 0 || strcmp(tx->category, "Loan / Credit Entry") == 0 || strstr(tx->notes, "[Loan") != NULL) {
+            if (tx->type == TRANSACTION_INCOME) {
+                loan_taken += tx->amount;
+            }
+        }
+    }
+    return loan_taken;
+}
+
