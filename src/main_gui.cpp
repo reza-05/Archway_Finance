@@ -771,6 +771,34 @@ int main(int argc, char** argv) {
             ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "-BDT %.2f", total_exp);
             ImGui::EndChild();
 
+   // Card 4: Net Cashflow
+            if (3 % cards_per_row != 0) ImGui::SameLine();
+            double net_cashflow = total_inc - total_exp;
+            ImGui::BeginChild("KpiCard4", ImVec2(card_w, 65), true);
+            ImGui::TextDisabled("NET CASHFLOW");
+            if (net_cashflow >= 0) {
+                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "+BDT %.2f", net_cashflow);
+            } else {
+                ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "-BDT %.2f", -net_cashflow);
+            }
+            ImGui::EndChild();
+
+            // Card 5: Outstanding Loan Highlight
+            if (4 % cards_per_row != 0) ImGui::SameLine();
+            double stat_loan_balance = core_get_outstanding_loan_balance(&g_state);
+            ImGui::BeginChild("KpiCard5", ImVec2(card_w, 65), true);
+            ImGui::TextDisabled("LOAN LIABILITIES");
+            if (stat_loan_balance > 0.0) {
+                ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "-BDT %.2f", stat_loan_balance);
+            } else {
+                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "BDT 0.00 (PAID)");
+            }
+            ImGui::EndChild();
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
   
     return 0;
 }
