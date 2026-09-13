@@ -108,5 +108,29 @@ typedef struct {
 } CategoryBreakdown;
 
 /**
+ * Main Ledger State containing all active in-memory data
+ */
+typedef struct {
+    Account accounts[MAX_ACCOUNTS];
+    int account_count;
+
+    Transaction transactions[MAX_TRANSACTIONS];
+    int transaction_count;
+
+    SavingGoal goals[MAX_GOALS];
+    int goal_count;
+} LedgerState;
+
+// Helper to convert AccountType enum to readable string
+static inline const char* get_account_type_str(AccountType type) {
+    switch (type) {
+        case ACCOUNT_CASH:    return "Cash";
+        case ACCOUNT_MFS:     return "MFS";
+        case ACCOUNT_CARD:    return "Card";
+        case ACCOUNT_SAVINGS: return "Savings";
+        case ACCOUNT_BANK:    return "Bank";
+        default:              return "Wallet";
+    }
+}
 
 #endif // MODELS_H
