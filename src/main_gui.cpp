@@ -1100,7 +1100,24 @@ int main(int argc, char** argv) {
             ImGui::InputText("##FormTxAmount", form_tx_amount_str, sizeof(form_tx_amount_str), ImGuiInputTextFlags_CharsDecimal);
             ImGui::EndGroup();
 
- 
+            ImGui::Spacing();
+
+            // 3. REAL-TIME DATE & TIME
+            ImGui::Text("Date & Time:");
+            ImGui::SetNextItemWidth(520);
+            ImGui::InputText("##FormTxDateTime", form_tx_datetime, sizeof(form_tx_datetime));
+
+            ImGui::Spacing();
+
+            // 4. CLEAN NOTES / DESCRIPTION MULTILINE FIELD
+            ImGui::Text("Notes / Description:");
+            ImGui::InputTextMultiline("##FormTxNotes", form_tx_notes, sizeof(form_tx_notes), ImVec2(520, 65));
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            
  
     return 0;
 }
