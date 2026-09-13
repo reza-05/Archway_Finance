@@ -473,3 +473,13 @@ double core_get_total_income(const LedgerState *state) {
     return total;
 }
 
+double core_get_total_expense(const LedgerState *state) {
+    double total = 0.0;
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].type == TRANSACTION_EXPENSE) {
+            total += state->transactions[i].amount;
+        }
+    }
+    return total;
+}
+
