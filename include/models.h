@@ -43,5 +43,15 @@ typedef enum {
     TRANSACTION_TRANSFER = 2 // Transfer between accounts
 } TransactionType;
 
+/**
+ * Account Structure (Starts at 0.00 BDT)
+ */
+typedef struct {
+    int id;
+    char name[MAX_NAME_LEN];
+    AccountType type;
+    double current_balance;
+} Account;
+
 
 #endif // MODELS_H
