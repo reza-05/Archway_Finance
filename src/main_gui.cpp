@@ -1052,7 +1052,55 @@ int main(int argc, char** argv) {
                 ImGui::EndGroup();
             }
 
+           ImGui::Spacing();
 
+            // 2. SELECTABLE CATEGORY & NUMERIC-ONLY AMOUNT FIELD
+            float half_field_w = 250.0f;
+            ImGui::BeginGroup();
+            ImGui::Text("Category:");
+            ImGui::SetNextItemWidth(half_field_w);
+
+            if (form_tx_type == 0) {
+                char cat_combo_str[512] = "";
+                int cat_pos = 0;
+                int num_exp_cats = sizeof(student_expense_cats) / sizeof(student_expense_cats[0]);
+                for (int c = 0; c < num_exp_cats; c++) {
+                    int len = strlen(student_expense_cats[c]);
+                    strcpy(cat_combo_str + cat_pos, student_expense_cats[c]);
+                    cat_pos += len + 1;
+                }
+                cat_combo_str[cat_pos] = '\0';
+
+                if (ImGui::Combo("##FormTxCatCombo", &selected_exp_cat_idx, cat_combo_str)) {
+                    strncpy(form_tx_category, student_expense_cats[selected_exp_cat_idx], sizeof(form_tx_category) - 1);
+                }
+            } else if (form_tx_type == 1) {
+                char cat_combo_str[512] = "";
+                int cat_pos = 0;
+                int num_inc_cats = sizeof(student_income_cats) / sizeof(student_income_cats[0]);
+                for (int c = 0; c < num_inc_cats; c++) {
+                    int len = strlen(student_income_cats[c]);
+                    strcpy(cat_combo_str + cat_pos, student_income_cats[c]);
+                    cat_pos += len + 1;
+                }
+                cat_combo_str[cat_pos] = '\0';
+
+                if (ImGui::Combo("##FormTxCatCombo", &selected_inc_cat_idx, cat_combo_str)) {
+                    strncpy(form_tx_category, student_income_cats[selected_inc_cat_idx], sizeof(form_tx_category) - 1);
+                }
+            } else {
+                ImGui::InputText("##FormTxCatText", form_tx_category, sizeof(form_tx_category));
+            }
+            ImGui::EndGroup();
+
+            ImGui::SameLine(280);
+            ImGui::BeginGroup();
+            ImGui::Text("Amount (BDT - Numeric Only):");
+            ImGui::SetNextItemWidth(half_field_w);
+            ImGui::InputText("##FormTxAmount", form_tx_amount_str, sizeof(form_tx_amount_str), ImGuiInputTextFlags_CharsDecimal);
+            ImGui::EndGroup();
+
+ 
  
     return 0;
 }
