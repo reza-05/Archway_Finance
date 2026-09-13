@@ -185,3 +185,48 @@ int core_add_transaction(LedgerState *state, int wallet_from_id, int wallet_to_i
                          const char *category, double amount, const char *datetime, const char *notes) {
     return core_add_transaction_with_overdraft(state, wallet_from_id, wallet_to_id, type, category, amount, datetime, notes, OVERDRAFT_REJECT, -1);
 }
+
+int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, int wallet_to_id, TransactionType type,
+                                        const char *category, double amount, const char *datetime, const char *notes,
+                                        OverdraftMode mode, int cover_source_wallet_id) {
+    if (!state || state->transaction_count >= MAX_TRANSACTIONS) return -1;
+    if (amount <= 0.0) return -1;
+
+    Account *from = core_find_account(state, wallet_from_id);
+    Account *to = core_find_account(state, wallet_to_id);
+
+    if ((type == TRANSACTION_EXPENSE || type == TRANSACTION_TRANSFER) && from) {
+        if (from->current_balance < amount) {
+            if (mode == OVERDRAFT_REJECT) {
+                return -2;
+            }
+        }
+    }
+
+    Transaction *tx = &state->transactions[state->transaction_count];
+    tx->id = state->transaction_count + 1;
+    tx->wallet_from_id = wallet_from_id;
+    tx->wallet_to_id = wallet_to_id;
+    tx->type = type;
+    strncpy(tx->category, category, MAX_CAT_LEN - 1);
+    tx->category[MAX_CAT_LEN - 1] = '\0';
+    tx->amount = amount;
+    strncpy(tx->datetime, datetime, MAX_DATE_LEN - 1);
+    tx->datetime[MAX_DATE_LEN - 1] = '\0';
+    if (notes) {
+        strncpy(tx->notes, notes, MAX_NOTE_LEN - 1);
+        tx->notes[MAX_NOTE_LEN - 1] = '\0';
+    } else {
+        tx->notes[0] = '\0';
+    }
+
+    if (type == TRANSACTION_INCOME && to) to->current_balance += amount;
+    else if (type == TRANSACTION_EXPENSE && from) from->current_balance -= amount;
+    else if (type == TRANSACTION_TRANSFER) {
+        if (from) from->current_balance -= amount;
+        if (to) to->current_balance += amount;
+    }
+
+    state->transaction_count++;
+    return tx->id;
+}
