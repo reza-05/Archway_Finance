@@ -435,3 +435,25 @@ int core_delete_transaction(LedgerState *state, int tx_id) {
     return 1;
 }
 
+int core_get_unique_categories(const LedgerState *state, char categories[][MAX_CAT_LEN], int max_cats) {
+    int count = 0;
+    for (int i = 0; i < state->transaction_count; i++) {
+        const char *cat = state->transactions[i].category;
+        if (cat[0] == '\0') continue;
+
+        int exists = 0;
+        for (int j = 0; j < count; j++) {
+            if (strcmp(categories[j], cat) == 0) {
+                exists = 1;
+                break;
+            }
+        }
+        if (!exists && count < max_cats) {
+            strncpy(categories[count], cat, MAX_CAT_LEN - 1);
+            categories[count][MAX_CAT_LEN - 1] = '\0';
+            count++;
+        }
+    }
+    return count;
+}
+
