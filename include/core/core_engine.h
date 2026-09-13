@@ -10,6 +10,16 @@
 
 #include "../models.h"
 
+/**
+ * Overdraft Handling Modes for Ledger Bookkeeping
+ */
+typedef enum {
+    OVERDRAFT_REJECT = 0,          // Reject transaction if funds are insufficient
+    OVERDRAFT_COVER_TRANSFER = 1,  // Transfer deficit from another source wallet
+    OVERDRAFT_COVER_LOAN = 2,      // Record a Loan/Credit entry to cover deficit
+    OVERDRAFT_COVER_SKIP = 3       // Cover & Skip: Makeup deficit & set paying wallet balance to 0.00
+} OverdraftMode;
+
 // Core Ledger Operations
 void core_init_ledger(LedgerState *state);
 
