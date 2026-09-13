@@ -36,5 +36,40 @@ double core_get_outstanding_loan_balance(const LedgerState *state);
 int core_is_loan_paid(const Transaction *tx);
 int core_pay_specific_loan(LedgerState *state, int loan_tx_id, int wallet_id, const char *datetime);
 
+// Transaction CRUD Operations with Overdraft Protection
+int core_add_transaction(LedgerState *state, int wallet_from_id, int wallet_to_id, TransactionType type, 
+                         const char *category, double amount, const char *datetime, const char *notes);
+
+int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, int wallet_to_id, TransactionType type,
+                                        const char *category, double amount, const char *datetime, const char *notes,
+                                        OverdraftMode mode, int cover_source_wallet_id);
+
+int core_repay_loan(LedgerState *state, int wallet_id, double amount, const char *datetime, const char *notes);
+
+int core_update_transaction(LedgerState *state, int tx_id, int wallet_from_id, int wallet_to_id, TransactionType type,
+                            const char *category, double amount, const char *datetime, const char *notes);
+int core_delete_transaction(LedgerState *state, int tx_id);
+
+// Dynamic Unique Category Extractor
+int core_get_unique_categories(const LedgerState *state, char categories[][MAX_CAT_LEN], int max_cats);
+
+// Analytics & Statistical Insights
+double core_get_total_income(const LedgerState *state);
+double core_get_total_expense(const LedgerState *state);
+double core_get_monthly_income(const LedgerState *state, int year, int month);
+double core_get_monthly_expense(const LedgerState *state, int year, int month);
+
+// Category Expenditure & Income Breakdown
+int core_get_category_breakdown(const LedgerState *state, CategoryBreakdown *output, int max_categories);
+int core_get_type_category_breakdown(const LedgerState *state, TransactionType tx_type, CategoryBreakdown *output, int max_categories);
+
+// Recursion: Savings Goal Projection
+int core_predict_months_to_goal_recursive(double current_saved, double target, double monthly_savings_rate, int month_counter);
+
+// Sorting Algorithms
+void core_sort_transactions_by_date(LedgerState *state);
+void core_sort_transactions_by_amount(LedgerState *state);
+
+#endif // CORE_ENGINE_H
 
 #endif // CORE_ENGINE_H
