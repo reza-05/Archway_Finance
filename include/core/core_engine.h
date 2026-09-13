@@ -9,6 +9,7 @@
 #define CORE_ENGINE_H
 
 #include "../models.h"
+#include "search_filter.h"
 
 /**
  * Overdraft Handling Modes for Ledger Bookkeeping
@@ -69,7 +70,5 @@ int core_predict_months_to_goal_recursive(double current_saved, double target, d
 // Sorting Algorithms
 void core_sort_transactions_by_date(LedgerState *state);
 void core_sort_transactions_by_amount(LedgerState *state);
-
-#endif // CORE_ENGINE_H
 
 #endif // CORE_ENGINE_H
