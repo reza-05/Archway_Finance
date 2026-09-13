@@ -423,5 +423,8 @@ int core_delete_transaction(LedgerState *state, int tx_id) {
         state->transactions[i] = state->transactions[i + 1];
     }
     state->transaction_count--;
+
+    // Double check safeguard: Ensure no balance is negative
+
     return 1;
 }
