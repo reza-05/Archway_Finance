@@ -844,6 +844,47 @@ int main(int argc, char** argv) {
             ImGui::EndChild();
             ImGui::EndChild(); // ExpensePiePanel
 
+             if (side_by_side) ImGui::SameLine();
+
+            // --- INCOME SOLID PIE CHART PANEL ---
+            ImGui::BeginChild("IncomePiePanel", ImVec2(chart_panel_w, panel_h), true);
+            ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "INCOME CATEGORY PIE CHART");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            CategoryBreakdown inc_breakdown[20];
+            int inc_cat_count = core_get_type_category_breakdown(&g_state, TRANSACTION_INCOME, inc_breakdown, 20);
+
+            // Pie chart positioning
+            ImVec2 inc_pie_center = ImVec2(ImGui::GetCursorScreenPos().x + pie_cx, ImGui::GetCursorScreenPos().y + 145);
+            RenderSolidPieChart(ImGui::GetWindowDrawList(), inc_pie_center, 115.0f, inc_breakdown, pie_colors_income, inc_cat_count, total_inc);
+
+            if (chart_panel_w > 450.0f) {
+                ImGui::SetCursorPosX(270.0f);
+                ImGui::BeginChild("IncLegend", ImVec2(chart_panel_w - 280.0f, 290), false);
+            } else {
+                ImGui::SetCursorPosY(285.0f);
+                ImGui::BeginChild("IncLegend", ImVec2(0, 180), false);
+            }
+
+            if (inc_cat_count == 0 || total_inc <= 0.0) {
+                ImGui::TextDisabled("No income records logged yet.");
+            } else {
+                ImGui::TextDisabled("Income Category Legend");
+                ImGui::Spacing();
+                for (int c = 0; c < inc_cat_count; c++) {
+                    ImU32 col = pie_colors_income[c % 6];
+                    ImVec4 vec_col = ImColor(col).Value;
+                    ImGui::ColorButton("##inc_col", vec_col, ImGuiColorEditFlags_NoTooltip, ImVec2(12, 12));
+                    ImGui::SameLine();
+                    ImGui::Text("%s:", inc_breakdown[c].category);
+                    ImGui::SameLine();
+                    ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "%.1f%% (BDT %.0f)", inc_breakdown[c].percentage, inc_breakdown[c].total_spent);
+                }
+            }
+            ImGui::EndChild();
+            ImGui::EndChild(); // IncomePiePanel
+
   
     return 0;
 }
