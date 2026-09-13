@@ -44,3 +44,18 @@ int core_add_account(LedgerState *state, const char *name, AccountType type, dou
     state->account_count++;
     return acc->id;
 }
+
+int core_update_account(LedgerState *state, int account_id, const char *new_name, AccountType new_type, double new_balance) {
+    Account *acc = core_find_account(state, account_id);
+    if (!acc) return 0;
+
+    if (new_name && strlen(new_name) > 0) {
+        strncpy(acc->name, new_name, MAX_NAME_LEN - 1);
+        acc->name[MAX_NAME_LEN - 1] = '\0';
+    }
+    acc->type = new_type;
+    acc->current_balance = (new_balance < 0.0) ? 0.0 : new_balance;
+
+    return 1;
+}
+
