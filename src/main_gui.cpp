@@ -736,6 +736,41 @@ int main(int argc, char** argv) {
 
                 ImGui::EndTable();
             }
-    }
+    } else {
+            // =====================================================================
+            // VIEW 2: 100% VERTICALLY SCROLLABLE STATISTICS & ANALYTICS PAGE
+            // =====================================================================
+            ImGui::BeginChild("StatsScrollView", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysVerticalScrollbar);
+
+            ImGui::TextColored(ImVec4(0.42f, 0.36f, 0.91f, 1.00f), "FINANCIAL INSIGHTS & PIE CHART ANALYTICS");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 1. RESPONSIVE AUTO-WRAPPING KPI OVERVIEW CARDS GRID
+            float avail_w = ImGui::GetContentRegionAvail().x;
+            int cards_per_row = (avail_w >= 1050.0f) ? 5 : ((avail_w >= 620.0f) ? 3 : 2);
+            float card_w = (avail_w - (cards_per_row - 1) * 10.0f) / (float)cards_per_row;
+
+            // Card 1: Total Net Worth
+            ImGui::BeginChild("KpiCard1", ImVec2(card_w, 65), true);
+            ImGui::TextDisabled("TOTAL NET WORTH");
+            ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "BDT %.2f", total_balance);
+            ImGui::EndChild();
+
+            // Card 2: Total Income
+            if (1 % cards_per_row != 0) ImGui::SameLine();
+            ImGui::BeginChild("KpiCard2", ImVec2(card_w, 65), true);
+            ImGui::TextDisabled("LIFETIME INCOME");
+            ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "+BDT %.2f", total_inc);
+            ImGui::EndChild();
+
+            // Card 3: Total Expense
+            if (2 % cards_per_row != 0) ImGui::SameLine();
+            ImGui::BeginChild("KpiCard3", ImVec2(card_w, 65), true);
+            ImGui::TextDisabled("LIFETIME EXPENSES");
+            ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "-BDT %.2f", total_exp);
+            ImGui::EndChild();
+
+  
     return 0;
 }
