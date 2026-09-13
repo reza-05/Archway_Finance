@@ -88,3 +88,11 @@ Account* core_find_account(LedgerState *state, int account_id) {
     return NULL;
 }
 
+double core_get_total_balance(const LedgerState *state) {
+    if (!state) return 0.0;
+    double total = 0.0;
+    for (int i = 0; i < state->account_count; i++) {
+        total += state->accounts[i].current_balance;
+    }
+    return total;
+}
