@@ -124,3 +124,9 @@ int storage_export_transactions_csv(const LedgerState *state, const char *filepa
     fclose(fp);
     return 1;
 }
+void storage_seed_initial_data(LedgerState *state) {
+    if (!state) return;
+
+    ledger_init_zero_state(state);
+    storage_save_ledger(state);
+}
