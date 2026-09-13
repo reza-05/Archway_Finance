@@ -1162,7 +1162,40 @@ int main(int argc, char** argv) {
             ImGui::EndPopup();
         }
 
-     
+            // =========================================================================
+        // MODAL 3: OVERDRAFT PROTECTION PROMPT (WITH OPTION C: COVER & SKIP)
+        // =========================================================================
+        if (show_overdraft_modal) {
+            ImGui::OpenPopup("Overdraft Warning: Insufficient Funds!");
+        }
+
+        ImGui::SetNextWindowSize(ImVec2(650, 440), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Overdraft Warning: Insufficient Funds!", NULL, ImGuiWindowFlags_None)) {
+            if (ImGui::IsMouseClicked(0) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)) {
+                show_overdraft_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "INSUFFICIENT FUNDS IN PAYING WALLET!");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            double parsed_amount = atof(form_tx_amount_str);
+            int from_id = (form_tx_from_idx < g_state.account_count) ? g_state.accounts[form_tx_from_idx].id : -1;
+            Account* paying_wallet = core_find_account(&g_state, from_id);
+
+            ImGui::Text("Wallet: %s", paying_wallet ? paying_wallet->name : "Wallet");
+            ImGui::Text("Current Available Balance: BDT %.2f", paying_wallet ? paying_wallet->current_balance : 0.0);
+            ImGui::Text("Requested Expense Amount:  BDT %.2f", parsed_amount);
+            ImGui::TextColored(ImVec4(1.0f, 0.46f, 0.46f, 1.0f), "Deficit Amount Needed:     BDT %.2f", overdraft_deficit);
+
+            ImGui::Spacing();
+            ImGui::TextWrapped("How would you like to cover this BDT %.2f deficit?", overdraft_deficit);
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+ 
  
     return 0;
 }
