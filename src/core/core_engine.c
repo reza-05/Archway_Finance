@@ -96,3 +96,12 @@ double core_get_total_balance(const LedgerState *state) {
     }
     return total;
 }
+
+int core_is_loan_paid(const Transaction *tx) {
+    if (!tx) return 0;
+    if (strstr(tx->notes, "[PAID]") != NULL || strstr(tx->notes, "[REPAID]") != NULL) {
+        return 1;
+    }
+    return 0;
+}
+
