@@ -17,7 +17,15 @@
     #define mkdir_cross(path) mkdir(path, 0755)
 #endif
 
+int storage_init_environment(void) {
+    struct stat st = {0};
 
+    if (stat(DATA_DIR, &st) == -1) {
+        mkdir_cross(DATA_DIR);
+    }
+
+    return 1;
+}
 int storage_save_ledger(const LedgerState *state) {
     if (!state) return 0;
     storage_init_environment();
