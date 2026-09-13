@@ -457,3 +457,19 @@ int core_get_unique_categories(const LedgerState *state, char categories[][MAX_C
     return count;
 }
 
+double core_get_total_income(const LedgerState *state) {
+    double total = 0.0;
+    for (int i = 0; i < state->transaction_count; i++) {
+        const Transaction *tx = &state->transactions[i];
+        if (tx->type == TRANSACTION_INCOME) {
+            if (strcmp(tx->category, "Loan / Credit") != 0 &&
+                strcmp(tx->category, "Loan / Credit Entry") != 0 &&
+                strcmp(tx->category, "Cover & Skip") != 0 &&
+                strstr(tx->notes, "[Loan") == NULL) {
+                total += tx->amount;
+            }
+        }
+    }
+    return total;
+}
+
