@@ -885,6 +885,47 @@ int main(int argc, char** argv) {
             ImGui::EndChild();
             ImGui::EndChild(); // IncomePiePanel
 
-  
+              ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            // 3. RESPONSIVE WALLET ASSET ALLOCATION DISTRIBUTION REPORT
+            float alloc_panel_h = (float)(60 + g_state.account_count * 38);
+            if (alloc_panel_h < 180.0f) alloc_panel_h = 180.0f;
+
+            ImGui::BeginChild("WalletAllocationPanel", ImVec2(0, alloc_panel_h), true);
+            ImGui::TextColored(ImVec4(0.42f, 0.36f, 0.91f, 1.00f), "WALLET ASSET ALLOCATION DISTRIBUTION");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            if (total_balance <= 0.0) {
+                ImGui::TextDisabled("Total balance is 0.00 BDT. Add income or funds to view distribution.");
+            } else {
+                for (int a = 0; a < g_state.account_count; a++) {
+                    Account* acc = &g_state.accounts[a];
+                    float frac = (float)(acc->current_balance / total_balance);
+                    if (frac < 0.0f) frac = 0.0f;
+
+                    float pbar_w = ImGui::GetContentRegionAvail().x - 280.0f;
+                    if (pbar_w < 120.0f) pbar_w = 120.0f;
+
+                    ImGui::Text("%-16s (BDT %.2f)", acc->name, acc->current_balance);
+                    ImGui::SameLine(220);
+                    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.42f, 0.36f, 0.91f, 1.00f));
+                    ImGui::ProgressBar(frac, ImVec2(pbar_w, 20), "");
+                    ImGui::PopStyleColor();
+                    ImGui::SameLine();
+                    ImGui::Text("%.1f%%", frac * 100.0f);
+                    ImGui::Spacing();
+                }
+            }
+            ImGui::EndChild();
+
+            ImGui::EndChild(); // StatsScrollView
+        }
+
+        ImGui::EndChild(); // MainContent
+
+ 
     return 0;
 }
