@@ -60,12 +60,16 @@ target_link_libraries(imgui PUBLIC glfw OpenGL::GL)
 
 # Explicitly defining source files prevents caching issues
 add_executable(archway
-    src/main.cpp
-    src/ui_dashboard.cpp
+    src/main_gui.cpp
+    src/core/core_engine.c
+    src/core/ledger_engine.c
+    src/core/search_filter.c
+    database/database.c
 )
 
 target_include_directories(archway PRIVATE
     ${CMAKE_SOURCE_DIR}/src
+    ${CMAKE_SOURCE_DIR}/include
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
 )
