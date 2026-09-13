@@ -1,4 +1,22 @@
-#include <direct.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#include "../include/models.h"
+#include "../include/storage/storage.h"
+#include "../include/core/core_engine.h"
+#include "../include/core/ledger_engine.h"
+
+// Cross-platform Directory Creator (Windows + macOS + Linux)
+#ifdef _WIN32
+    #include <direct.h>
+    #define mkdir_cross(path) _mkdir(path)
+#else
+    #define mkdir_cross(path) mkdir(path, 0755)
+#endif
+
 
 int storage_save_ledger(const LedgerState *state) {
     if (!state) return 0;
