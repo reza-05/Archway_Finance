@@ -1313,7 +1313,48 @@ int main(int argc, char** argv) {
             ImGui::EndPopup();
         }
 
-  
+         // =========================================================================
+        // MODAL 5: INTERACTIVE LOAN & CREDIT LEDGER MANAGER
+        // =========================================================================
+        ImGui::SetNextWindowSize(ImVec2(750, 480), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Loan & Credit Ledger Manager", NULL, ImGuiWindowFlags_None)) {
+            if (ImGui::IsMouseClicked(0) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(0.42f, 0.36f, 0.91f, 1.00f), "LOAN & CREDIT HISTORY & REPAYMENT MANAGER");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            double tot_taken = core_get_total_loan_taken(&g_state);
+            double tot_repaid = core_get_total_loan_repaid(&g_state);
+            double out_balance = core_get_outstanding_loan_balance(&g_state);
+
+            ImGui::TextDisabled("TOTAL LOANS TAKEN:"); ImGui::SameLine();
+            ImGui::Text("BDT %.2f", tot_taken); ImGui::SameLine(250);
+            ImGui::TextDisabled("TOTAL REPAID:"); ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "BDT %.2f", tot_repaid); ImGui::SameLine(480);
+            ImGui::TextDisabled("OUTSTANDING:"); ImGui::SameLine();
+            if (out_balance > 0.0) {
+                ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "BDT %.2f", out_balance);
+            } else {
+                ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "BDT 0.00 (ALL PAID)");
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            if (ImGui::BeginTable("LoanManagerTable", 6, ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY)) {
+                ImGui::TableSetupColumn("Date/Time", ImGuiTableColumnFlags_WidthFixed, 125.0f);
+                ImGui::TableSetupColumn("Loan Amount", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+                ImGui::TableSetupColumn("Deposited Wallet", ImGuiTableColumnFlags_WidthFixed, 110.0f);
+                ImGui::TableSetupColumn("Notes / Details", ImGuiTableColumnFlags_WidthStretch, 1.0f);
+                ImGui::TableSetupColumn("Status", ImGuiTableColumnFlags_WidthFixed, 80.0f);
+                ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 90.0f);
+                ImGui::TableHeadersRow();
+
+ 
  
     return 0;
 }
