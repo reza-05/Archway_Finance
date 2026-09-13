@@ -1117,7 +1117,52 @@ int main(int argc, char** argv) {
             ImGui::Separator();
             ImGui::Spacing();
 
-            
+                  if (ImGui::Button("Save Record", ImVec2(160, 38))) {
+                double parsed_amount = atof(form_tx_amount_str);
+                if (parsed_amount < 0.0) parsed_amount = 0.0;
+
+                int from_id = (form_tx_from_idx < g_state.account_count) ? g_state.accounts[form_tx_from_idx].id : -1;
+                int to_id = (form_tx_to_idx < g_state.account_count) ? g_state.accounts[form_tx_to_idx].id : -1;
+
+                Account* paying_wallet = core_find_account(&g_state, from_id);
+                if (form_tx_type != 1 && paying_wallet && paying_wallet->current_balance < parsed_amount) {
+                    overdraft_deficit = parsed_amount - paying_wallet->current_balance;
+                    overdraft_cover_wallet_idx = 0;
+                    show_overdraft_modal = true;
+                } else {
+                    if (form_tx_id > 0) {
+                        core_update_transaction(&g_state, form_tx_id, from_id, to_id, 
+                                                (TransactionType)form_tx_type, form_tx_category, 
+                                                parsed_amount, form_tx_datetime, form_tx_notes);
+                    } else {
+                        core_add_transaction(&g_state, from_id, to_id, 
+                                             (TransactionType)form_tx_type, form_tx_category, 
+                                             parsed_amount, form_tx_datetime, form_tx_notes);
+                    }
+                    storage_save_ledger(&g_state);
+                    RefreshFilter();
+
+                    // Check for formal loan repayment prompt on income/deposit
+                    double cur_loan = core_get_outstanding_loan_balance(&g_state);
+                    if (form_tx_type == 1 && cur_loan > 0.0 && parsed_amount > 0.0) {
+                        repay_prompt_deposit_amount = parsed_amount;
+                        repay_prompt_wallet_id = to_id;
+                        Account* dep_w = core_find_account(&g_state, to_id);
+                        strncpy(repay_prompt_wallet_name, dep_w ? dep_w->name : "Wallet", sizeof(repay_prompt_wallet_name) - 1);
+                        show_loan_repay_modal = true;
+                    }
+
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(140, 38))) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+     
  
     return 0;
 }
