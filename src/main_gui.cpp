@@ -1354,7 +1354,58 @@ int main(int argc, char** argv) {
                 ImGui::TableSetupColumn("Action", ImGuiTableColumnFlags_WidthFixed, 90.0f);
                 ImGui::TableHeadersRow();
 
- 
+                 for (int i = 0; i < g_state.transaction_count; i++) {
+                    Transaction* tx = &g_state.transactions[i];
+                    bool is_loan_cat = (strcmp(tx->category, "Loan / Credit") == 0 || 
+                                        strcmp(tx->category, "Loan / Credit Entry") == 0 || 
+                                        strstr(tx->notes, "[Loan") != NULL);
+                    
+                    if (is_loan_cat && tx->type == TRANSACTION_INCOME) {
+                        bool is_paid = core_is_loan_paid(tx);
+                        Account* dep_w = core_find_account(&g_state, tx->wallet_to_id);
+
+                        ImGui::TableNextRow();
+                        ImGui::TableSetColumnIndex(0); ImGui::Text("%s", tx->datetime);
+
+                        // Amount Column: RED when unpaid, GREEN when paid (AMOUNT PRESERVED!)
+                        ImGui::TableSetColumnIndex(1);
+                        if (is_paid) {
+                            ImGui::TextColored(ImVec4(0.0f, 0.75f, 0.45f, 1.0f), "+BDT %.2f", tx->amount);
+                        } else {
+                            ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "+BDT %.2f", tx->amount);
+                        }
+
+                        ImGui::TableSetColumnIndex(2); ImGui::Text("%s", dep_w ? dep_w->name : "Cash");
+                        ImGui::TableSetColumnIndex(3); ImGui::Text("%s", tx->notes);
+
+                        // Status Column
+                        ImGui::TableSetColumnIndex(4);
+                        if (is_paid) {
+                            ImGui::TextColored(ImVec4(0.0f, 0.75f, 0.45f, 1.0f), "PAID");
+                        } else {
+                            ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "UNPAID");
+                        }
+
+                        // Action Column
+                        ImGui::TableSetColumnIndex(5);
+                        if (is_paid) {
+                            ImGui::TextDisabled("✓ Repaid");
+                        } else {
+                            char pay_btn_id[32]; snprintf(pay_btn_id, sizeof(pay_btn_id), "Pay Now##loan_%d", tx->id);
+                            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.65f, 0.45f, 1.00f));
+                            if (ImGui::Button(pay_btn_id, ImVec2(75, 22))) {
+                                pay_now_target_loan_id = tx->id;
+                                pay_now_wallet_idx = 0;
+                                trigger_open_pay_loan = true;
+                            }
+                            ImGui::PopStyleColor();
+                        }
+                    }
+                }
+                ImGui::EndTable();
+            }
+
+
  
     return 0;
 }
