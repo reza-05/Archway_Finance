@@ -362,3 +362,36 @@ int core_update_transaction(LedgerState *state, int tx_id, int wallet_from_id, i
     return 1;
 }
 
+
+int core_delete_transaction(LedgerState *state, int tx_id) {
+    int idx = -1;
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].id == tx_id) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == -1) return 0;
+
+    Transaction *tx = &state->transactions[idx];
+
+    // Revert Wallet Balances
+    if (tx->type == TRANSACTION_INCOME) {
+        Account *to = core_find_account(state, tx->wallet_to_id);
+        if (to) to->current_balance -= tx->amount;
+    } else if (tx->type == TRANSACTION_EXPENSE) {
+        Account *from = core_find_account(state, tx->wallet_from_id);
+        if (from) from->current_balance += tx->amount;
+    } else if (tx->type == TRANSACTION_TRANSFER) {
+        Account *from = core_find_account(state, tx->wallet_from_id);
+        Account *to = core_find_account(state, tx->wallet_to_id);
+        if (from) from->current_balance += tx->amount;
+        if (to) to->current_balance -= tx->amount;
+    }
+
+    for (int i = idx; i < state->transaction_count - 1; i++) {
+        state->transactions[i] = state->transactions[i + 1];
+    }
+    state->transaction_count--;
+    return 1;
+}
