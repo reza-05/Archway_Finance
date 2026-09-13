@@ -203,15 +203,30 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
                 return -2;
             } else if (mode == OVERDRAFT_COVER_TRANSFER) {
                 Account *cover_src = core_find_account(state, cover_source_wallet_id);
-                if (!cover_src || cover_src->current_balance < deficit) {
-                    return -2;
-                }
+                if (!cover_src || cover_src->current_balance < deficit) return -2;
                 cover_src->current_balance -= deficit;
                 from->current_balance += deficit;
 
                 char auto_note[100];
                 snprintf(auto_note, sizeof(auto_note), "[Auto Cover Deficit for %s]", category);
                 core_add_transaction(state, cover_source_wallet_id, wallet_from_id, TRANSACTION_TRANSFER, "Auto Transfer", deficit, datetime, auto_note);
+            } else if (mode == OVERDRAFT_COVER_LOAN) {
+                from->current_balance = amount;
+                char loan_note[100];
+                snprintf(loan_note, sizeof(loan_note), "[Loan/Credit to cover %s deficit]", category);
+                
+                Transaction *loan_tx = &state->transactions[state->transaction_count++];
+                loan_tx->id = state->transaction_count;
+                loan_tx->wallet_from_id = -1;
+                loan_tx->wallet_to_id = wallet_from_id;
+                loan_tx->type = TRANSACTION_INCOME;
+                strncpy(loan_tx->category, "Loan / Credit", MAX_CAT_LEN - 1);
+                loan_tx->category[MAX_CAT_LEN - 1] = '\0';
+                loan_tx->amount = deficit;
+                strncpy(loan_tx->datetime, datetime, MAX_DATE_LEN - 1);
+                loan_tx->datetime[MAX_DATE_LEN - 1] = '\0';
+                strncpy(loan_tx->notes, loan_note, MAX_NOTE_LEN - 1);
+                loan_tx->notes[MAX_NOTE_LEN - 1] = '\0';
             }
         }
     }
