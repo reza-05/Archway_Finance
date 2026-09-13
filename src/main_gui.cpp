@@ -1405,7 +1405,17 @@ int main(int argc, char** argv) {
                 ImGui::EndTable();
             }
 
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
 
+            if (ImGui::Button("Close", ImVec2(120, 32))) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
+ 
  
     return 0;
 }
