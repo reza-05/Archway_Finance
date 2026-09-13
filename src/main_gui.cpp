@@ -1228,7 +1228,34 @@ int main(int argc, char** argv) {
                 ImGui::CloseCurrentPopup();
             }
 
-   
+              ImGui::Spacing();
+
+            // OPTION C: COVER & SKIP (MAKE UP DEFICIT & SET WALLET TO 0.00 BDT)
+            ImGui::Text("Option C: Cover & Skip (Make Up Deficit & Set Wallet to 0.00):");
+            ImGui::SameLine(470);
+            if (ImGui::Button("Skip & Set 0 Bal", ImVec2(140, 26))) {
+                core_add_transaction_with_overdraft(&g_state, from_id, -1, (TransactionType)form_tx_type,
+                                                    form_tx_category, parsed_amount, form_tx_datetime, form_tx_notes,
+                                                    OVERDRAFT_COVER_SKIP, -1);
+                storage_save_ledger(&g_state);
+                RefreshFilter();
+                show_overdraft_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            if (ImGui::Button("Cancel Transaction", ImVec2(160, 32))) {
+                show_overdraft_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+
+            ImGui::EndPopup();
+        }
+
+  
  
     return 0;
 }
