@@ -180,3 +180,8 @@ int core_pay_specific_loan(LedgerState *state, int loan_tx_id, int wallet_id, co
     return 1;
 }
 
+
+int core_add_transaction(LedgerState *state, int wallet_from_id, int wallet_to_id, TransactionType type, 
+                         const char *category, double amount, const char *datetime, const char *notes) {
+    return core_add_transaction_with_overdraft(state, wallet_from_id, wallet_to_id, type, category, amount, datetime, notes, OVERDRAFT_REJECT, -1);
+}
