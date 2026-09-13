@@ -610,10 +610,31 @@ int core_repay_loan(LedgerState *state, int wallet_id, double amount, const char
                 tx->notes[MAX_NOTE_LEN - 1] = '\0';
                 remaining_to_repay -= tx->amount;
             } else if (remaining_to_repay > 0.0) {
+                double remaining_loan = tx->amount - remaining_to_repay;
+                double paid_part = remaining_to_repay;
+
+                // Adjust current transaction to the paid portion and stamp [PAID]
+                tx->amount = paid_part;
                 char updated_notes[MAX_NOTE_LEN];
                 snprintf(updated_notes, sizeof(updated_notes), "[PAID] %s", tx->notes);
                 strncpy(tx->notes, updated_notes, MAX_NOTE_LEN - 1);
                 tx->notes[MAX_NOTE_LEN - 1] = '\0';
+
+                // Spawn the remaining unpaid loan portion so liability is not lost
+                if (state->transaction_count < MAX_TRANSACTIONS) {
+                    Transaction *rem_tx = &state->transactions[state->transaction_count];
+                    rem_tx->id = state->transaction_count + 1;
+                    state->transaction_count++;
+                    rem_tx->wallet_from_id = tx->wallet_from_id;
+                    rem_tx->wallet_to_id = tx->wallet_to_id;
+                    rem_tx->type = TRANSACTION_INCOME;
+                    strncpy(rem_tx->category, tx->category, MAX_CAT_LEN - 1);
+                    rem_tx->category[MAX_CAT_LEN - 1] = '\0';
+                    rem_tx->amount = remaining_loan;
+                    strncpy(rem_tx->datetime, tx->datetime, MAX_DATE_LEN - 1);
+                    rem_tx->datetime[MAX_DATE_LEN - 1] = '\0';
+                    snprintf(rem_tx->notes, MAX_NOTE_LEN, "[Remaining Loan] of BDT %.2f", remaining_loan);
+                }
                 remaining_to_repay = 0.0;
             }
             if (remaining_to_repay <= 0.0) break;
