@@ -1,62 +1,132 @@
-#include "stdio.h"
-#include "database.h"
-#include "string.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-void init_database(Database *db) {     // intialized count to 0
-    if (db != NULL) {
-        db->count = 0;
+#include "../include/models.h"
+#include "../include/storage/storage.h"
+#include "../include/core/core_engine.h"
+#include "../include/core/ledger_engine.h"
+
+// Cross-platform Directory Creator (Windows + macOS + Linux)
+#ifdef _WIN32
+    #include <direct.h>
+    #define mkdir_cross(path) _mkdir(path)
+#else
+    #define mkdir_cross(path) mkdir(path, 0755)
+#endif
+
+int storage_init_environment(void) {
+    struct stat st = {0};
+
+    if (stat(DATA_DIR, &st) == -1) {
+        mkdir_cross(DATA_DIR);
     }
+
+    return 1;
+}
+int storage_save_ledger(const LedgerState *state) {
+    if (!state) return 0;
+    storage_init_environment();
+
+    FILE *fa = fopen(ACCOUNTS_FILE, "wb");
+    if (fa) {
+        fwrite(&state->account_count, sizeof(int), 1, fa);
+        if (state->account_count > 0) {
+            fwrite(state->accounts, sizeof(Account), state->account_count, fa);
+        }
+        fclose(fa);
+    } else return 0;
+
+    FILE *ft = fopen(TRANSACTIONS_FILE, "wb");
+    if (ft) {
+        fwrite(&state->transaction_count, sizeof(int), 1, ft);
+        if (state->transaction_count > 0) {
+            fwrite(state->transactions, sizeof(Transaction), state->transaction_count, ft);
+        }
+        fclose(ft);
+    } else return 0;
+
+    FILE *fg = fopen(GOALS_FILE, "wb");
+    if (fg) {
+        fwrite(&state->goal_count, sizeof(int), 1, fg);
+        if (state->goal_count > 0) {
+            fwrite(state->goals, sizeof(SavingGoal), state->goal_count, fg);
+        }
+        fclose(fg);
+    } else return 0;
+
+    return 1;
 }
 
 
-//injection of values into database
-int add_transaction(Database *db, double amount, int is_income, const char *category, const char *date, const char *description) {
-    Transaction *t = &db->list[db->count];
+int storage_load_ledger(LedgerState *state) {
+    if (!state) return 0;
+    core_init_ledger(state);
 
-    t->id = db->count+1;
+    FILE *fa = fopen(ACCOUNTS_FILE, "rb");
+    if (fa) {
+        fread(&state->account_count, sizeof(int), 1, fa);
+        if (state->account_count > MAX_ACCOUNTS) state->account_count = MAX_ACCOUNTS;
+        if (state->account_count > 0) {
+            fread(state->accounts, sizeof(Account), state->account_count, fa);
+        }
+        fclose(fa);
+    } else return 0;
 
-    t->amount= amount;
+    FILE *ft = fopen(TRANSACTIONS_FILE, "rb");
+    if (ft) {
+        fread(&state->transaction_count, sizeof(int), 1, ft);
+        if (state->transaction_count > MAX_TRANSACTIONS) state->transaction_count = MAX_TRANSACTIONS;
+        if (state->transaction_count > 0) {
+            fread(state->transactions, sizeof(Transaction), state->transaction_count, ft);
+        }
+        fclose(ft);
+    }
 
-    t->is_income = is_income;
+    FILE *fg = fopen(GOALS_FILE, "rb");
+    if (fg) {
+        fread(&state->goal_count, sizeof(int), 1, fg);
+        if (state->goal_count > MAX_GOALS) state->goal_count = MAX_GOALS;
+        if (state->goal_count > 0) {
+            fread(state->goals, sizeof(SavingGoal), state->goal_count, fg);
+        }
+        fclose(fg);
+    }
 
-    strcpy(t->category, category);
-    t->category[49]= '\0';
-
-    strcpy(t->date, date);
-    t->date[19]= '\0';
-
-    strcpy(t->description,description);
-    t->description[49] = '\0';
-
-    db->count++;
-
+    return 1;
 }
 
-int save_database(const Database *db, const char *filename){
+int storage_export_transactions_csv(const LedgerState *state, const char *filepath) {
+    if (!state || !filepath) return 0;
 
+    FILE *fp = fopen(filepath, "w");
+    if (!fp) return 0;
 
-    FILE *file = fopen(filename, "wb");
+    fprintf(fp, "ID,Date/Time,Type,Category,WalletFrom,WalletTo,Notes,Amount,RunningBalance\n");
 
-    fwrite(&(db->count), sizeof(int), 1, file);  // transaction count first
+    for (int i = 0; i < state->transaction_count; i++) {
+        const Transaction *tx = &state->transactions[i];
+        Account *from = core_find_account((LedgerState*)state, tx->wallet_from_id);
+        Account *to = core_find_account((LedgerState*)state, tx->wallet_to_id);
 
-    if(db->count > 0)
-        fwrite(db->list,sizeof(Transaction),db->count,file);   // then copy all transactions
+        const char *from_name = from ? from->name : "-";
+        const char *to_name = to ? to->name : "-";
+        const char *type_str = (tx->type == TRANSACTION_INCOME) ? "Income" : 
+                               ((tx->type == TRANSACTION_EXPENSE) ? "Expense" : "Transfer");
 
-    fclose(file);
+        fprintf(fp, "%d,%s,%s,%s,%s,%s,\"%s\",%.2f,%.2f\n",
+                tx->id, tx->datetime, type_str, tx->category,
+                from_name, to_name, tx->notes, tx->amount, tx->running_balance);
+    }
+
+    fclose(fp);
+    return 1;
 }
+void storage_seed_initial_data(LedgerState *state) {
+    if (!state) return;
 
-
-
-int load_database(Database *db, const char *filename){
-
-    FILE *file = fopen(filename, "rb");
-
-  if(file == NULL)
-        printf("Please input the correct file name.");
-
-    fread(&(db->count), sizeof(int), 1, file); // get count
-
-    fread(db->list, sizeof(Transaction),db->count,file); // load transactions
-
-    fclose(file);
+    ledger_init_zero_state(state);
+    storage_save_ledger(state);
 }
