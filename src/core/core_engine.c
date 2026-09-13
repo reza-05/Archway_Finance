@@ -180,12 +180,18 @@ int core_pay_specific_loan(LedgerState *state, int loan_tx_id, int wallet_id, co
     return 1;
 }
 
+// ============================================================================
+// TRANSACTION OPERATIONS & OVERDRAFT SAFEGUARD
+// ============================================================================
 
 int core_add_transaction(LedgerState *state, int wallet_from_id, int wallet_to_id, TransactionType type, 
                          const char *category, double amount, const char *datetime, const char *notes) {
     return core_add_transaction_with_overdraft(state, wallet_from_id, wallet_to_id, type, category, amount, datetime, notes, OVERDRAFT_REJECT, -1);
 }
 
+/**
+ * Add Transaction with Overdraft Protection (NO NEGATIVE BALANCES)
+ */
 int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, int wallet_to_id, TransactionType type,
                                         const char *category, double amount, const char *datetime, const char *notes,
                                         OverdraftMode mode, int cover_source_wallet_id) {
@@ -195,31 +201,38 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
     Account *from = core_find_account(state, wallet_from_id);
     Account *to = core_find_account(state, wallet_to_id);
 
+    // NO NEGATIVE BALANCE SAFEGUARD
     if ((type == TRANSACTION_EXPENSE || type == TRANSACTION_TRANSFER) && from) {
         if (from->current_balance < amount) {
             double deficit = amount - from->current_balance;
 
             if (mode == OVERDRAFT_REJECT) {
-                return -2;
+                return -2; // Insufficient funds error code
             } else if (mode == OVERDRAFT_COVER_TRANSFER) {
                 Account *cover_src = core_find_account(state, cover_source_wallet_id);
-                if (!cover_src || cover_src->current_balance < deficit) return -2;
+                if (!cover_src || cover_src->current_balance < deficit) {
+                    return -2; // Cover wallet also lacks funds!
+                }
+                // Auto Transfer Deficit from cover wallet to paying wallet
                 cover_src->current_balance -= deficit;
                 from->current_balance += deficit;
 
+                // Record Auto Transfer Entry
                 char auto_note[100];
                 snprintf(auto_note, sizeof(auto_note), "[Auto Cover Deficit for %s]", category);
                 core_add_transaction(state, cover_source_wallet_id, wallet_from_id, TRANSACTION_TRANSFER, "Auto Transfer", deficit, datetime, auto_note);
             } else if (mode == OVERDRAFT_COVER_LOAN) {
+                // Record Loan / Credit Entry - Set paying wallet balance to amount so after deducting expense, balance is EXACTLY 0.00 BDT
                 from->current_balance = amount;
                 char loan_note[100];
                 snprintf(loan_note, sizeof(loan_note), "[Loan/Credit to cover %s deficit]", category);
                 
+                // Add loan transaction record WITHOUT mutating wallet balance again!
                 Transaction *loan_tx = &state->transactions[state->transaction_count++];
                 loan_tx->id = state->transaction_count;
                 loan_tx->wallet_from_id = -1;
                 loan_tx->wallet_to_id = wallet_from_id;
-                loan_tx->type = TRANSACTION_INCOME;
+                loan_tx->type = TRANSACTION_INCOME; // Tracked as Loan Entry
                 strncpy(loan_tx->category, "Loan / Credit", MAX_CAT_LEN - 1);
                 loan_tx->category[MAX_CAT_LEN - 1] = '\0';
                 loan_tx->amount = deficit;
@@ -227,6 +240,24 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
                 loan_tx->datetime[MAX_DATE_LEN - 1] = '\0';
                 strncpy(loan_tx->notes, loan_note, MAX_NOTE_LEN - 1);
                 loan_tx->notes[MAX_NOTE_LEN - 1] = '\0';
+            } else if (mode == OVERDRAFT_COVER_SKIP) {
+                // Cover & Skip: Set paying wallet balance so after deducting expense, balance is EXACTLY 0.00 BDT
+                from->current_balance = amount;
+                char skip_note[100];
+                snprintf(skip_note, sizeof(skip_note), "[Cover & Skip Adjustment for %s]", category);
+                
+                Transaction *skip_tx = &state->transactions[state->transaction_count++];
+                skip_tx->id = state->transaction_count;
+                skip_tx->wallet_from_id = -1;
+                skip_tx->wallet_to_id = wallet_from_id;
+                skip_tx->type = TRANSACTION_INCOME;
+                strncpy(skip_tx->category, "Cover & Skip", MAX_CAT_LEN - 1);
+                skip_tx->category[MAX_CAT_LEN - 1] = '\0';
+                skip_tx->amount = deficit;
+                strncpy(skip_tx->datetime, datetime, MAX_DATE_LEN - 1);
+                skip_tx->datetime[MAX_DATE_LEN - 1] = '\0';
+                strncpy(skip_tx->notes, skip_note, MAX_NOTE_LEN - 1);
+                skip_tx->notes[MAX_NOTE_LEN - 1] = '\0';
             }
         }
     }
@@ -248,13 +279,15 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
         tx->notes[0] = '\0';
     }
 
-    if (type == TRANSACTION_INCOME && to) to->current_balance += amount;
-    else if (type == TRANSACTION_EXPENSE && from) from->current_balance -= amount;
-    else if (type == TRANSACTION_TRANSFER) {
+    if (type == TRANSACTION_INCOME) {
+        if (to) to->current_balance += amount;
+    } else if (type == TRANSACTION_EXPENSE) {
+        if (from) from->current_balance -= amount;
+    } else if (type == TRANSACTION_TRANSFER) {
         if (from) from->current_balance -= amount;
         if (to) to->current_balance += amount;
     }
 
-    state->transaction_count++;
+
     return tx->id;
 }
