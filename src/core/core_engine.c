@@ -560,3 +560,30 @@ int core_predict_months_to_goal_recursive(double current_saved, double target, d
     return core_predict_months_to_goal_recursive(current_saved + monthly_savings_rate, target, monthly_savings_rate, month_counter + 1);
 }
 
+static int compare_by_date(const void *a, const void *b) {
+    const Transaction *tx1 = (const Transaction *)a;
+    const Transaction *tx2 = (const Transaction *)b;
+    int cmp = strcmp(tx2->datetime, tx1->datetime);
+    if (cmp != 0) return cmp;
+    return tx2->id - tx1->id; // Higher ID (latest transaction) at the top!
+}
+
+static int compare_by_amount_desc(const void *a, const void *b) {
+    const Transaction *tx1 = (const Transaction *)a;
+    const Transaction *tx2 = (const Transaction *)b;
+    if (tx2->amount > tx1->amount) return 1;
+    if (tx2->amount < tx1->amount) return -1;
+    return 0;
+}
+
+void core_sort_transactions_by_date(LedgerState *state) {
+    if (state->transaction_count <= 1) return;
+    qsort(state->transactions, state->transaction_count, sizeof(Transaction), compare_by_date);
+}
+
+void core_sort_transactions_by_amount(LedgerState *state) {
+    if (state->transaction_count <= 1) return;
+    qsort(state->transactions, state->transaction_count, sizeof(Transaction), compare_by_amount_desc);
+    ledger_recalculate_running_balances(state);
+}
+
