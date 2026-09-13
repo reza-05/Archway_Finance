@@ -973,6 +973,36 @@ int main(int argc, char** argv) {
             ImGui::Separator();
             ImGui::Spacing();
 
+            if (ImGui::Button("Save Wallet", ImVec2(160, 38))) {
+                double init_bal = atof(form_acc_balance_str);
+                int acc_id_result = -1;
+                if (is_edit) {
+                    core_update_account(&g_state, form_acc_id, form_acc_name, (AccountType)form_acc_type, init_bal);
+                    acc_id_result = form_acc_id;
+                } else {
+                    acc_id_result = core_add_account(&g_state, form_acc_name, (AccountType)form_acc_type, init_bal);
+                }
+                storage_save_ledger(&g_state);
+                RefreshFilter();
+
+                // Check for formal loan repayment prompt on deposit
+                double cur_loan = core_get_outstanding_loan_balance(&g_state);
+                if (cur_loan > 0.0 && init_bal > 0.0) {
+                    repay_prompt_deposit_amount = init_bal;
+                    repay_prompt_wallet_id = acc_id_result;
+                    strncpy(repay_prompt_wallet_name, form_acc_name, sizeof(repay_prompt_wallet_name) - 1);
+                    show_loan_repay_modal = true;
+                }
+
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(140, 38))) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
  
  
     return 0;
