@@ -53,5 +53,60 @@ typedef struct {
     double current_balance;
 } Account;
 
+/**
+ * Transaction Structure with Running Balance Tracking
+ */
+typedef struct {
+    int id;
+    int wallet_from_id;         // Account ID money came from (-1 if N/A or Income)
+    int wallet_to_id;           // Account ID money went to (-1 if N/A or Expense)
+    TransactionType type;
+    char category[MAX_CAT_LEN];  // e.g. "Food & Drinks", "Gifts", "Health & Beauty"
+    double amount;
+    double running_balance;     // Running Balance after this transaction
+    char datetime[MAX_DATE_LEN]; // "YYYY-MM-DD HH:MM AM/PM"
+    char notes[MAX_NOTE_LEN];
+} Transaction;
+
+/**
+ * Daily Summary Structure
+ */
+typedef struct {
+    char date[11];               // "YYYY-MM-DD"
+    double daily_income;         // Today's Total Income
+    double daily_expense;        // Today's Total Expense
+    double closing_balance;      // Today's Closing Balance
+} DailySummary;
+
+/**
+ * Search & Filter Criteria Struct
+ */
+typedef struct {
+    int wallet_id_filter;       // -1 for All Wallets, else specific Account ID
+    char category_filter[MAX_CAT_LEN]; // Empty string for All Categories, else category name
+    char search_text[MAX_NOTE_LEN];    // Text search query matching notes or category
+} TransactionFilter;
+
+/**
+ * Saving Goal Structure
+ */
+typedef struct {
+    int id;
+    char title[MAX_NAME_LEN];
+    double target_amount;
+    double current_amount;
+    char target_date[15];
+} SavingGoal;
+
+/**
+ * Category Breakdown Result Structure
+ */
+typedef struct {
+    char category[MAX_CAT_LEN];
+    double total_spent;
+    double percentage;
+} CategoryBreakdown;
+
+/**
 
 #endif // MODELS_H
