@@ -10,8 +10,8 @@
  */
 
 #include "../../include/core/core_engine.h"
-// pending ledger_engine.h
-// pending storage.h
+#include "../../include/core/ledger_engine.h"
+#include "../../include/storage/storage.h"
 
 void core_init_ledger(LedgerState *state) {
     if (!state) return;
@@ -587,3 +587,45 @@ void core_sort_transactions_by_amount(LedgerState *state) {
     ledger_recalculate_running_balances(state);
 }
 
+int core_repay_loan(LedgerState *state, int wallet_id, double amount, const char *datetime, const char *notes) {
+    if (!state || amount <= 0.0) return -1;
+    double current_loan = core_get_outstanding_loan_balance(state);
+    if (current_loan <= 0.0) return 0;
+
+    double repay_amt = (amount < current_loan) ? amount : current_loan;
+    double remaining_to_repay = repay_amt;
+
+    // Mark unpaid loans as [PAID] starting from active loans
+    for (int i = state->transaction_count - 1; i >= 0; i--) {
+        Transaction *tx = &state->transactions[i];
+        bool is_loan_cat = (strcmp(tx->category, "Loan / Credit") == 0 || 
+                            strcmp(tx->category, "Loan / Credit Entry") == 0 || 
+                            strstr(tx->notes, "[Loan") != NULL);
+
+        if (is_loan_cat && tx->type == TRANSACTION_INCOME && !core_is_loan_paid(tx)) {
+            if (remaining_to_repay >= tx->amount) {
+                char updated_notes[MAX_NOTE_LEN];
+                snprintf(updated_notes, sizeof(updated_notes), "[PAID] %s", tx->notes);
+                strncpy(tx->notes, updated_notes, MAX_NOTE_LEN - 1);
+                tx->notes[MAX_NOTE_LEN - 1] = '\0';
+                remaining_to_repay -= tx->amount;
+            } else if (remaining_to_repay > 0.0) {
+                char updated_notes[MAX_NOTE_LEN];
+                snprintf(updated_notes, sizeof(updated_notes), "[PAID] %s", tx->notes);
+                strncpy(tx->notes, updated_notes, MAX_NOTE_LEN - 1);
+                tx->notes[MAX_NOTE_LEN - 1] = '\0';
+                remaining_to_repay = 0.0;
+            }
+            if (remaining_to_repay <= 0.0) break;
+        }
+    }
+
+    char default_note[100];
+    if (notes && notes[0] != '\0') {
+        snprintf(default_note, sizeof(default_note), "%s", notes);
+    } else {
+        snprintf(default_note, sizeof(default_note), "[Loan Repayment of BDT %.2f]", repay_amt);
+    }
+
+    return core_add_transaction(state, wallet_id, -1, TRANSACTION_EXPENSE, "Loan Repayment", repay_amt, datetime, default_note);
+}
