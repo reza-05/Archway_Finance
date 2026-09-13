@@ -1255,6 +1255,64 @@ int main(int argc, char** argv) {
             ImGui::EndPopup();
         }
 
+         // =========================================================================
+        // MODAL 4: FORMAL LOAN REPAYMENT PROMPT MODAL
+        // =========================================================================
+        if (show_loan_repay_modal) {
+            ImGui::OpenPopup("Formal Loan Repayment Prompt");
+        }
+
+        ImGui::SetNextWindowSize(ImVec2(580, 360), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Formal Loan Repayment Prompt", NULL, ImGuiWindowFlags_None)) {
+            if (ImGui::IsMouseClicked(0) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)) {
+                show_loan_repay_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "OUTSTANDING LOAN DETECTED!");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            double active_loan = core_get_outstanding_loan_balance(&g_state);
+            double suggested_repay = (repay_prompt_deposit_amount < active_loan) ? repay_prompt_deposit_amount : active_loan;
+
+            ImGui::Text("Active Outstanding Loan Balance: BDT %.2f", active_loan);
+            ImGui::Text("Newly Deposited Funds:            BDT %.2f", repay_prompt_deposit_amount);
+            ImGui::Text("Target Deposit Wallet:            %s", repay_prompt_wallet_name);
+
+            ImGui::Spacing();
+            ImGui::TextWrapped("Would you like to formally use this deposit of BDT %.2f to repay your outstanding loan balance?", repay_prompt_deposit_amount);
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            char repay_btn_label[64];
+            snprintf(repay_btn_label, sizeof(repay_btn_label), "Yes, Repay Loan (BDT %.2f)", suggested_repay);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.65f, 0.45f, 1.00f));
+            if (ImGui::Button(repay_btn_label, ImVec2(240, 36))) {
+                char now_time[25];
+                GetCurrentFormattedDateTime(now_time, sizeof(now_time));
+                core_repay_loan(&g_state, repay_prompt_wallet_id, suggested_repay, now_time, "[Formal Repayment]");
+                storage_save_ledger(&g_state);
+                RefreshFilter();
+                show_loan_repay_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::SameLine();
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.5f, 0.5f, 0.5f, 1.00f));
+            if (ImGui::Button("No, Keep Funds in Wallet", ImVec2(220, 36))) {
+                show_loan_repay_modal = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::PopStyleColor();
+
+            ImGui::EndPopup();
+        }
+
   
  
     return 0;
