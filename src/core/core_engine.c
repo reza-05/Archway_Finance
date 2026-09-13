@@ -119,3 +119,15 @@ double core_get_total_loan_taken(const LedgerState *state) {
     return loan_taken;
 }
 
+double core_get_total_loan_repaid(const LedgerState *state) {
+    if (!state) return 0.0;
+    double loan_repay = 0.0;
+    for (int i = 0; i < state->transaction_count; i++) {
+        const Transaction *tx = &state->transactions[i];
+        if (strcmp(tx->category, "Loan Repayment") == 0 || strcmp(tx->category, "Loan Repay") == 0) {
+            loan_repay += tx->amount;
+        }
+    }
+    return loan_repay;
+}
+
