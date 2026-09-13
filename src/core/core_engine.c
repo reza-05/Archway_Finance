@@ -299,3 +299,66 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
     ledger_recalculate_running_balances(state);
     return tx->id;
 }
+
+int core_update_transaction(LedgerState *state, int tx_id, int wallet_from_id, int wallet_to_id, TransactionType type,
+                            const char *category, double amount, const char *datetime, const char *notes) {
+    int idx = -1;
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].id == tx_id) {
+            idx = i;
+            break;
+        }
+    }
+    if (idx == -1) return 0;
+
+    Transaction *old_tx = &state->transactions[idx];
+    if (old_tx->type == TRANSACTION_INCOME) {
+        Account *to = core_find_account(state, old_tx->wallet_to_id);
+        if (to) to->current_balance -= old_tx->amount;
+    } else if (old_tx->type == TRANSACTION_EXPENSE) {
+        Account *from = core_find_account(state, old_tx->wallet_from_id);
+        if (from) from->current_balance += old_tx->amount;
+    } else if (old_tx->type == TRANSACTION_TRANSFER) {
+        Account *from = core_find_account(state, old_tx->wallet_from_id);
+        Account *to = core_find_account(state, old_tx->wallet_to_id);
+        if (from) from->current_balance += old_tx->amount;
+        if (to) to->current_balance -= old_tx->amount;
+    }
+
+    old_tx->wallet_from_id = wallet_from_id;
+    old_tx->wallet_to_id = wallet_to_id;
+    old_tx->type = type;
+    strncpy(old_tx->category, category, MAX_CAT_LEN - 1);
+    old_tx->category[MAX_CAT_LEN - 1] = '\0';
+    old_tx->amount = amount;
+    strncpy(old_tx->datetime, datetime, MAX_DATE_LEN - 1);
+    old_tx->datetime[MAX_DATE_LEN - 1] = '\0';
+    if (notes) {
+        strncpy(old_tx->notes, notes, MAX_NOTE_LEN - 1);
+        old_tx->notes[MAX_NOTE_LEN - 1] = '\0';
+    }
+
+    if (type == TRANSACTION_INCOME) {
+        Account *to = core_find_account(state, wallet_to_id);
+        if (to) to->current_balance += amount;
+    } else if (type == TRANSACTION_EXPENSE) {
+        Account *from = core_find_account(state, wallet_from_id);
+        if (from) from->current_balance -= amount;
+    } else if (type == TRANSACTION_TRANSFER) {
+        Account *from = core_find_account(state, wallet_from_id);
+        Account *to = core_find_account(state, wallet_to_id);
+        if (from) from->current_balance -= amount;
+        if (to) to->current_balance += amount;
+    }
+
+    // Double check safeguard: Ensure no balance is negative
+    for (int i = 0; i < state->account_count; i++) {
+        if (state->accounts[i].current_balance < 0.0) {
+            state->accounts[i].current_balance = 0.0;
+        }
+    }
+
+    ledger_recalculate_running_balances(state);
+    return 1;
+}
+
