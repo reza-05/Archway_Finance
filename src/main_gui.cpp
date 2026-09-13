@@ -1415,6 +1415,85 @@ int main(int argc, char** argv) {
             ImGui::EndPopup();
         }
 
+        // =========================================================================
+        // MODAL 6: PAY NOW WALLET SELECTION SUB-MODAL
+        // =========================================================================
+        ImGui::SetNextWindowSize(ImVec2(500, 260), ImGuiCond_Appearing);
+        if (ImGui::BeginPopupModal("Pay Now - Wallet Selection", NULL, ImGuiWindowFlags_None)) {
+            if (ImGui::IsMouseClicked(0) && !ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows)) {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::Spacing();
+            ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "SELECT PAYING WALLET FOR LOAN REPAYMENT");
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            Transaction* target_loan = NULL;
+            for (int i = 0; i < g_state.transaction_count; i++) {
+                if (g_state.transactions[i].id == pay_now_target_loan_id) {
+                    target_loan = &g_state.transactions[i];
+                    break;
+                }
+            }
+
+            if (target_loan) {
+                ImGui::Text("Repaying Loan Entry #%d", target_loan->id);
+                ImGui::Text("Repayment Amount Needed: BDT %.2f", target_loan->amount);
+                ImGui::Spacing();
+
+                ImGui::Text("Select Wallet to Pay From:");
+                ImGui::SetNextItemWidth(450);
+                ImGui::Combo("##PayNowWalletCombo", &pay_now_wallet_idx, wallet_names_buf + strlen("All Wallets") + 1);
+
+                int paying_w_id = (pay_now_wallet_idx < g_state.account_count) ? g_state.accounts[pay_now_wallet_idx].id : -1;
+                Account* selected_paying_acc = core_find_account(&g_state, paying_w_id);
+                double selected_bal = selected_paying_acc ? selected_paying_acc->current_balance : 0.0;
+
+                bool has_sufficient_funds = (selected_bal >= target_loan->amount);
+
+                ImGui::Spacing();
+                if (selected_paying_acc) {
+                    if (has_sufficient_funds) {
+                        ImGui::TextColored(ImVec4(0.0f, 0.72f, 0.58f, 1.0f), "Available Balance: BDT %.2f (Sufficient)", selected_bal);
+                    } else {
+                        ImGui::TextColored(ImVec4(1.0f, 0.25f, 0.25f, 1.0f), "[!] INSUFFICIENT FUNDS! Available: BDT %.2f (Deficit: BDT %.2f)", 
+                                           selected_bal, target_loan->amount - selected_bal);
+                    }
+                }
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                if (has_sufficient_funds) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.0f, 0.65f, 0.45f, 1.00f));
+                    if (ImGui::Button("Confirm Payment", ImVec2(160, 34))) {
+                        char now_time[25];
+                        GetCurrentFormattedDateTime(now_time, sizeof(now_time));
+                        int res = core_pay_specific_loan(&g_state, pay_now_target_loan_id, paying_w_id, now_time);
+                        if (res > 0) {
+                            storage_save_ledger(&g_state);
+                            RefreshFilter();
+                            ImGui::CloseCurrentPopup();
+                        }
+                    }
+                    ImGui::PopStyleColor();
+                } else {
+                    ImGui::BeginDisabled();
+                    ImGui::Button("Confirm Payment (Insufficient Balance)", ImVec2(270, 34));
+                    ImGui::EndDisabled();
+                }
+
+                ImGui::SameLine();
+                if (ImGui::Button("Cancel", ImVec2(120, 34))) {
+                    ImGui::CloseCurrentPopup();
+                }
+            } else {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+
  
  
     return 0;
