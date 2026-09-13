@@ -197,8 +197,21 @@ int core_add_transaction_with_overdraft(LedgerState *state, int wallet_from_id, 
 
     if ((type == TRANSACTION_EXPENSE || type == TRANSACTION_TRANSFER) && from) {
         if (from->current_balance < amount) {
+            double deficit = amount - from->current_balance;
+
             if (mode == OVERDRAFT_REJECT) {
                 return -2;
+            } else if (mode == OVERDRAFT_COVER_TRANSFER) {
+                Account *cover_src = core_find_account(state, cover_source_wallet_id);
+                if (!cover_src || cover_src->current_balance < deficit) {
+                    return -2;
+                }
+                cover_src->current_balance -= deficit;
+                from->current_balance += deficit;
+
+                char auto_note[100];
+                snprintf(auto_note, sizeof(auto_note), "[Auto Cover Deficit for %s]", category);
+                core_add_transaction(state, cover_source_wallet_id, wallet_from_id, TRANSACTION_TRANSFER, "Auto Transfer", deficit, datetime, auto_note);
             }
         }
     }
