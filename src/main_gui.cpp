@@ -13,8 +13,12 @@
  * - Minimum arc angle solid pie chart rendering (150px radius).
  */
 
-#define GLFW_INCLUDE_NONE
-#include <OpenGL/gl3.h>
+#if defined(__APPLE__)
+    #define GLFW_INCLUDE_NONE
+    #include <OpenGL/gl3.h>
+#else
+    #include <GL/gl.h>
+#endif
 #include <GLFW/glfw3.h>
 
 #include "imgui.h"
