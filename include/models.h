@@ -22,5 +22,26 @@
 #define MAX_GOALS 10
 #define MAX_TRANSACTIONS 500
 
+/**
+ * Account Types supported in Add Wallet form:
+ * Cash, MFS (bKash/Nagad/Rocket), Card, Savings, Bank
+ */
+typedef enum {
+    ACCOUNT_CASH = 0,
+    ACCOUNT_MFS = 1,
+    ACCOUNT_CARD = 2,
+    ACCOUNT_SAVINGS = 3,
+    ACCOUNT_BANK = 4
+} AccountType;
+
+/**
+ * Transaction Types (Standard English Terms: Expense, Income, Transfer)
+ */
+typedef enum {
+    TRANSACTION_EXPENSE = 0, // Expense (-BDT)
+    TRANSACTION_INCOME = 1,  // Income (+BDT)
+    TRANSACTION_TRANSFER = 2 // Transfer between accounts
+} TransactionType;
+
 
 #endif // MODELS_H
