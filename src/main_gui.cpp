@@ -1195,7 +1195,25 @@ int main(int argc, char** argv) {
             ImGui::Separator();
             ImGui::Spacing();
 
- 
+            // OPTION A: TRANSFER DEFICIT FROM ANOTHER WALLET
+            ImGui::Text("Option A: Cover Deficit from another Wallet:");
+            ImGui::SetNextItemWidth(340);
+            ImGui::Combo("##CoverSourceWallet", &overdraft_cover_wallet_idx, wallet_names_buf + strlen("All Wallets") + 1);
+            ImGui::SameLine();
+            if (ImGui::Button("Transfer & Pay", ImVec2(130, 26))) {
+                int cover_id = (overdraft_cover_wallet_idx < g_state.account_count) ? g_state.accounts[overdraft_cover_wallet_idx].id : -1;
+                int res = core_add_transaction_with_overdraft(&g_state, from_id, -1, (TransactionType)form_tx_type,
+                                                    form_tx_category, parsed_amount, form_tx_datetime, form_tx_notes,
+                                                    OVERDRAFT_COVER_TRANSFER, cover_id);
+                if (res > 0) {
+                    storage_save_ledger(&g_state);
+                    RefreshFilter();
+                    show_overdraft_modal = false;
+                    ImGui::CloseCurrentPopup();
+                }
+            }
+
+  
  
     return 0;
 }
