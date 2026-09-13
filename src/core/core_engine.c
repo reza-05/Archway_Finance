@@ -483,3 +483,34 @@ double core_get_total_expense(const LedgerState *state) {
     return total;
 }
 
+double core_get_monthly_expense(const LedgerState *state, int year, int month) {
+    double total = 0.0;
+    char prefix[8];
+    snprintf(prefix, sizeof(prefix), "%04d-%02d", year, month);
+
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].type == TRANSACTION_EXPENSE) {
+            if (strncmp(state->transactions[i].datetime, prefix, 7) == 0) {
+                total += state->transactions[i].amount;
+            }
+        }
+    }
+    return total;
+}
+
+double core_get_monthly_income(const LedgerState *state, int year, int month) {
+    double total = 0.0;
+    char prefix[8];
+    snprintf(prefix, sizeof(prefix), "%04d-%02d", year, month);
+
+    for (int i = 0; i < state->transaction_count; i++) {
+        if (state->transactions[i].type == TRANSACTION_INCOME) {
+            if (strncmp(state->transactions[i].datetime, prefix, 7) == 0) {
+                total += state->transactions[i].amount;
+            }
+        }
+    }
+    return total;
+}
+
+int core_get_category_breakdown(const LedgerState *state, CategoryBreakdown *output, int max_categories) {
